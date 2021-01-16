@@ -54,6 +54,4 @@ dkms.conf
 # debug folder
 .DS_Store
 .idea/
-CMakeLists.txt
 books/
-cmake-build-debug/
