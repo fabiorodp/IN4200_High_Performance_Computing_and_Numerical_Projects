@@ -9,7 +9,7 @@ int exercise1() {
     double limit = 1;
     char sign[] = "n";
 
-    while (a < 1000000000) {
+    while (a < 1000002) {
 
         double denominator;
 
@@ -27,10 +27,10 @@ int exercise1() {
     }
 
     if (limit == 4. / 5) {
-        printf("The limit %f is correct!\n", limit);
+        printf("The limit %f is 4/5.\n", limit);
 
     } else {
-        printf("The limit %f is wrong!\n", limit);
+        printf("The limit %f is not 4/5.\n", limit);
     }
 
     return 0;
