@@ -52,4 +52,8 @@ Mkfile.old
 dkms.conf
 
 # debug folder
-.cmake-build-debug/
+.DS_Store
+.idea/
+CMakeLists.txt
+books/
+cmake-build-debug/
