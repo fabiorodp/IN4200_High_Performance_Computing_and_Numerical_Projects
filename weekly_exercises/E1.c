@@ -24,6 +24,10 @@ void array_example (){
     *(p+1) = 4;
     *(p+2) = 6;
 
+    if ( p == NULL){
+        perror("Error: Memory not allocated.");
+    };
+
     for ( i=0; i<3; ++i ) {
         printf("array[%d] = %d \n", i, p[i]);
     }
