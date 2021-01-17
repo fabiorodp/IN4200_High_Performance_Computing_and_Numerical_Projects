@@ -37,7 +37,7 @@ int exercise1a() {
     }
 
     return 0;
-};
+}
 
 
 int exercise1b(int n, int seed) {
@@ -71,6 +71,12 @@ int exercise1b(int n, int seed) {
 
     return 0;
 }
+
+
+int exercise1c(){
+    return 0;
+}
+
 
 int main(){
     exercise1b( 10, 11);
