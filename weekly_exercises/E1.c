@@ -26,6 +26,7 @@ void array_example (){
 
     if ( p == NULL){
         perror("Error: Memory not allocated.");
+        exit(1);
     };
 
     for ( i=0; i<3; ++i ) {
@@ -97,28 +98,79 @@ void exercise1b(int n, int seed) {
 }
 
 
-int exercise1c(int m, int n, int seed){
+void exercise1c(int m, int n, int seed){
 
-    int i, j, array[m][n];
+    int i, j, array[m][n], transpose[n][m];
 
     /* setting the seed */
     srand(seed);
 
-    for ( i=0; i<m; ++i ) {
+    for ( i=0; i<m; ++i )
         for ( j=0; j<n; ++j ) {
-            array[i][j] = i+j;
+            array[i][j] = rand();
+            printf("array[%d][%d] = %d \n", i, j, array[i][j]);
         }
+
+    // Finding the transpose of matrix a
+    for (i = 0; i < m; ++i)
+        for (j = 0; j < n; ++j) {
+            transpose[j][i] = array[i][j];
+            printf("transpose[%d][%d] = %d \n", j, i, array[i][j]);
+        }
+}
+
+
+void exercise1d(int nx, int ny, int nz){
+
+    // local variables
+    int i, j, k, array[nx][ny][nz];
+
+    for ( i=0; i<nx; ++i )
+        for ( j=0; j<ny; ++j )
+            for ( k=0; k<nz; ++k ){
+                array[i][j][k] = i * ny * nz + j * nz + k;
+                printf("array[%d][%d][%d] = %d \n", i, j, k, array[i][j][k]);
+            }
+    // deallocating the array
+    // free(array);
+}
+
+
+int exercise2() {
+
+    // pointer with FILE type
+    FILE *file;
+
+    // opening file
+    file = fopen("weekly_exercises/E1_data.txt","r");  // mode:a+
+
+    // returning error if file not found
+    if ( file == NULL ){
+        perror("Error: File not found.");
+        exit(1);
     }
 
-    printf("%d \n", array[0][0]);
+    // allocating an array of char for each line
+    char line[200];
+
+    while ( !feof(file) ){
+        fgets(line, sizeof(line), file);
+        printf("%s", line);
+    }
+
+    // closing file
+    fclose(file);
 
     return 0;
 }
 
+
 int main(){
-    pointers_example();  // returns 5
-    array_example();  // returns array
-    exercise1a();
-    exercise1b(3, 10);
-    // exercise1c();
+    // pointers_example();  // returns 5
+    // array_example();  // returns array
+    // exercise1a();
+    // exercise1b(3, 10);
+    // exercise1c(3, 2, 10);
+    // exercise1d(3,4,5);
+    exercise2();
 }
