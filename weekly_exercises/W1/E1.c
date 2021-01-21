@@ -2,8 +2,10 @@
 // E-mail: fabior@uio.no
 // ./a.out
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
 
 
 void pointers_example (){
