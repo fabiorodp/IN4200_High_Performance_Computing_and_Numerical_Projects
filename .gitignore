@@ -58,3 +58,4 @@ books/
 CMakeLists.txt
 cmake-build-debug
 resolutions/
+.vscode/
