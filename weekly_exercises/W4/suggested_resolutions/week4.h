@@ -104,7 +104,7 @@ int free2D(double **A)
 }
 
 // Print matrix values.
-int printmat(double **A, int n, int m)
+void printmat(double **A, int n, int m)
 {
     for (size_t i = 0; i < n; ++i){
         printf("| ");

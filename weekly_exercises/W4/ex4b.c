@@ -18,7 +18,7 @@ int main()
     double *B = calloc(N, sizeof *B);
 
     // Assigning some random numbers:
-    srand(time(NULL)); // Seeds the random number generator.
+    srand(1); // Seeds the random number generator.
 
     // assigning random values to array B
     for (i = 0; i < N; ++i)

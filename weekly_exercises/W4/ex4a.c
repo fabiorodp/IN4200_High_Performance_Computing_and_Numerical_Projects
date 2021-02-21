@@ -14,11 +14,11 @@ int main()
 {
     double arrA, arrB;
     int N = 100, s = 10, i;
-    double *A = malloc(N * sizeof *A);
-    double *B = calloc(N, sizeof *B);
+    double *A = malloc(N * sizeof(double));
+    double *B = calloc(N, sizeof(double));
 
     // Assigning some random numbers:
-    srand(time(NULL)); // Seeds the random number generator.
+    srand(1); // Seeds the random number generator.
 
     // assigning random values to array B
     for (i = 0; i < N; ++i)
@@ -30,14 +30,14 @@ int main()
     for (int i = 0; i < N ; ++i)
     {
         A[i] = s*B[i];
-        //printf("%f\n", A[i]);
+        //printf("%f\n", *(A+i));
     }
     clock_t t1 = clock();
     
-    double elapsed_time = 1000*(double)(t1 - t0)/CLOCKS_PER_SEC;
+    double elapsed_time = (double)(t1 - t0)/CLOCKS_PER_SEC;
     printf("Elapsed time: %lf ms\n", elapsed_time);
 
-    double bytes = 2 * N * sizeof *A;
+    double bytes = 2 * N * sizeof(*A);
     printf("Bytes per sec: %f\n", bytes/elapsed_time);
     printf("Flops per sec: %f\n", N/elapsed_time);
 
