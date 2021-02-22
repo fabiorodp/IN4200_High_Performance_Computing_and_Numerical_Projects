@@ -29,10 +29,10 @@ int alloc2DRandomMatrix(double*** arr, int n, int m, int set_rand_value)
 {
     printf("Allocating matrix...\n");
 
-    (*arr) = (double**) calloc(n, sizeof(double*));
+    (*arr) = calloc(n, sizeof *(*arr));  // (double**) calloc(n, sizeof(double*));
 
     for (int i = 0; i < n; i++)
-        *(*arr+i) = (double*) calloc(m, sizeof(double));
+        *(*arr+i) = calloc(m, sizeof *(*(*arr+i)));  // (double*) calloc(m, sizeof(double));
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
@@ -103,7 +103,7 @@ int main(int argc, char const *argv[])
     clock_t t0 = clock();
     matmult(&A, &B, &C, n, m, p);
     clock_t t1 = clock();
-    double elapsed_matmult = (double) (t1-t0)/CLOCKS_PER_SEC;
+    double elapsed_matmult = (double) 10000*(t1-t0)/CLOCKS_PER_SEC;
 
     // printing results for the matrix C
     printMatrix2D(C, n, p);
@@ -112,21 +112,25 @@ int main(int argc, char const *argv[])
     clock_t t2 = clock();
     matmult_fast(&A, &B, &D, n, m, p);
     clock_t t3 = clock();
-    double elapsed_matmult_fast = (double) (t2-t3)/CLOCKS_PER_SEC;
+    double elapsed_matmult_fast = (double) 10000*(t3-t2)/CLOCKS_PER_SEC;
 
     // printing results for the matrix D
     printf("\n");
     printMatrix2D(D, n, p);
 
     printf("\n");
-    printf("Total time matmult:     %f s\n", elapsed_matmult);
-    printf("Total time matmultfast: %f s\n", elapsed_matmult_fast);
+    printf("Total time matmult:     %f ns\n", elapsed_matmult);
+    printf("Total time matmultfast: %f ns\n", elapsed_matmult_fast);
     printf("Speedup ratio: %f\n", elapsed_matmult/elapsed_matmult_fast);
 
     free(A);
+    free(*A);
     free(B);
+    free(*B);
     free(C);
+    free(*C);
     free(D);
+    free(*D);
 
     return 0;
 }
