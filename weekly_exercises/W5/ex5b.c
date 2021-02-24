@@ -2,7 +2,7 @@
 // E-mail: fabior@uio.no
 
 // compiling & running
-// gcc ex5a.c
+// gcc ex5b.c
 // ./a.out
 // gcc w5_e2_unroll.c week5.h
 
