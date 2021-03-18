@@ -9,6 +9,7 @@
 #include <stdio.h>  // printf
 #include <math.h>
 #include <time.h>
+#include "read_graph_from_file2.c"
 
 
 /*
@@ -35,17 +36,37 @@ Specifies:
 Example:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 For example,
-an col_idx equals [ 1,2,3,   0,2,3,  0,1,3,4,    0,1,2,4,    2,3 ]
+an col_idx equals [ 1,2,3,    0,2,3,    0,1,3,4,    0,1,2,4,    2,3 ]
 and row_ptr equals [ 0,3,6,10,14,16 ]
-generates a SNN_val equals [ ]
+
+table2D_val equals [ 1,1,1,  1,1,1,  1,1,1,1,  1,1,1,1,  1,1 ]
+SNN_val equals [ 2,2,2,  2,2,2,  2,2,3,1,  2,2,3,1,  1,1 ]
 */
 void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
 {
+    for (size_t i = 0; i < N; i++)  // looping over row_ptr
+    {
+        size_t init_idx = row_ptr[i];
+        size_t end_idx = row_ptr[i+1];
 
+        // printf("\n %d %d\n", init_idx, end_idx);
+
+        // looping over each batch of col_idx and sorting it out
+        for (size_t j = init_idx; j < end_idx; j++)
+            for (size_t k = j + 1; k <  end_idx; k++)
+            {
+                if ( (*col_idx)[j] > (*col_idx)[k] )
+                {
+                    int temp =  (*col_idx)[j];
+                    (*col_idx)[j] = (*col_idx)[k];
+                    (*col_idx)[k] = temp;
+                }
+            }
+    }
 }
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     // declaration for the CRS matrix
     int *col_idx;
