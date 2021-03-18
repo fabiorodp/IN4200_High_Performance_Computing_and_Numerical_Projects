@@ -146,31 +146,31 @@ void read_graph_from_file2(
 
 }
 
-int main(int argc, char *argv[]){
-    int *col_idx;
-    int *row_ptr;
-    int N;
-
-    // calling function
-    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
-
-    // number of the edges of the example we will test on
-    int N_edges = 8;
-
-    // testing returned values for col_idx
-    for ( size_t i = 0; i < 2*N_edges; i++)
-        printf("%d", col_idx[i]);
-
-    printf("\n");
-
-    // testing returned values for row_ptr
-    for ( size_t i = 0; i < N+1; i++)
-        printf("%d", row_ptr[i]);
-
-    printf("\n");
-
-    free(col_idx);
-    free(row_ptr);
-
-    return 0;
-}
+//int main(int argc, char *argv[]){
+//    int *col_idx;
+//    int *row_ptr;
+//    int N;
+//
+//    // calling function
+//    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
+//
+//    // number of the edges of the example we will test on
+//    int N_edges = 8;
+//
+//    // testing returned values for col_idx
+//    for ( size_t i = 0; i < 2*N_edges; i++)
+//        printf("%d", col_idx[i]);
+//
+//    printf("\n");
+//
+//    // testing returned values for row_ptr
+//    for ( size_t i = 0; i < N+1; i++)
+//        printf("%d", row_ptr[i]);
+//
+//    printf("\n");
+//
+//    free(col_idx);
+//    free(row_ptr);
+//
+//    return 0;
+//}
