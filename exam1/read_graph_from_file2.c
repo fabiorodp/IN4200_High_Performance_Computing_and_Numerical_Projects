@@ -33,7 +33,7 @@ allocated as a 2D array.
 2nd. CRS only stores the nonzero values and avoids multiplication 
 with zeros.
 
-Specificies:
+Specifies:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 - Uses two array1D: 
     -> int **col_idx:
@@ -45,10 +45,6 @@ Specificies:
         |-> (*row_ptr) = malloc(N+1 * sizeof row_ptr)
         |-> "dissecting" the array col_idx with respect to the diff nodes.
 
-- An extra array for SNN:
-    |-> unsigned int **SNN_val:
-        |-> (*SNN_val) = malloc(2*N * sizeof SNN_val)
-
 Example format:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Examples of col_idx and row_ptr for the Connectivity Graphs file in 
@@ -59,14 +55,15 @@ row_ptr: 0,3,6,10,14,16
 
 Arguments:
 ~~~~~~~~~~~~~~~~~~~~~~~~
-*filename: file containing a connectivity graph.
-*N := the number of nodes.
-**row_ptr := of length N + 1 contains the indices at which new rows 
+char *filename: file containing a connectivity graph.
+int *N := the number of nodes.
+int **row_ptr := of length N + 1 contains the indices at which new rows
 start in array val (not needed for binary values).
-**col_idx := records the original column position of the all nonzeros
+int **col_idx := records the original column position of the all non-zeros
 values.
 */
-void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx){
+void read_graph_from_file2(
+        char *filename, int *N, int **row_ptr, int **col_idx){
 
     FILE *file;
 
@@ -92,13 +89,13 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
 
     // assigning values to the arrays
     unsigned int count = 0;
-    for (int node = 0; node < (*N)+1; node++)  // to keep arrays' order
+    for (size_t node = 0; node < (*N)+1; node++)  // to keep arrays' order
     {   
         while ( fgets(ln, sizeof ln, file) ) 
         {
             if (ln[0] == '#') continue;  // efficiency
             
-            unsigned int temp1, temp2;  // to not incur in memory storage trafic
+            unsigned int temp1, temp2;  // not incur in memory storage traffic
             sscanf(ln, "%u %u\n", &temp1, &temp2);
 
             // printf("%u %u\n", temp1, temp2);
@@ -122,27 +119,55 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
         // assigning the count
         (*row_ptr)[node+1] = count;
         
-        // moving the cursor from the end to the beggining of the file
+        // moving the cursor from the end to the beginning of the file
         rewind(file);
     }
 
-    for ( int i = 0; i < 2*N_edges; i++)
-        printf("%d", (*col_idx)[i]);
-    
-    printf("\n");
-    
-    for ( int i = 0; i < *N+1; i++)
-        printf("%d", (*row_ptr)[i]);
-    
-    printf("\n");
+    // sorting col_idx array
+    for (size_t i = 0; i < *N; i++)  // looping over row_ptr
+    {
+        int init_idx = (*row_ptr)[i];
+        int end_idx = (*row_ptr)[i+1];
+
+        // printf("\n %d %d\n", init_idx, end_idx);
+
+        // looping over each batch of col_idx and sorting it out
+        for (size_t j = init_idx; j < end_idx; j++)
+            for (size_t k = j + 1; k <  end_idx; k++)
+            {
+                if ( (*col_idx)[j] > (*col_idx)[k] )
+                {
+                    int temp =  (*col_idx)[j];
+                    (*col_idx)[j] = (*col_idx)[k];
+                    (*col_idx)[k] = temp;
+                }
+            }
+    }
+
 }
 
 int main(int argc, char *argv[]){
-
     int *col_idx;
     int *row_ptr;
     int N;
+
+    // calling function
     read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
+
+    // number of the edges of the example we will test on
+    int N_edges = 8;
+
+    // testing returned values for col_idx
+    for ( size_t i = 0; i < 2*N_edges; i++)
+        printf("%d", col_idx[i]);
+
+    printf("\n");
+
+    // testing returned values for row_ptr
+    for ( size_t i = 0; i < N+1; i++)
+        printf("%d", row_ptr[i]);
+
+    printf("\n");
 
     free(col_idx);
     free(row_ptr);

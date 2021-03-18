@@ -21,7 +21,7 @@ What does this function do:
 3. allocates a 2D table of correct dimension inside the function;
 4. fills its content and passes it out (thus triple pointer as type for table2D).
 
-Specificies:
+Specifies:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 binary table2D N x N of char values (CG) or int values (SNN)
 N:=num_nodes
@@ -43,9 +43,9 @@ nodes   0   1   2   3   4
 
 Arguments:
 ~~~~~~~~~~~~~~~~~~~~~~~~
-*filename: file containing a connectivity graph.
-*N := the number of nodes.
-***table2D := 2D table of correct dimension.
+char *filename: file containing a connectivity graph.
+int *N := the number of nodes.
+char ***table2D := 2D table of correct dimension.
 */
 void read_graph_from_file1(char *filename, int *N, char ***table2D){
 
@@ -87,41 +87,33 @@ void read_graph_from_file1(char *filename, int *N, char ***table2D){
 }
 
 
-// typedef struct {
-
-//     int n;
-//     int **table_2D;
-
-// }data_2D;
-
-
-int main(int argc, char *argv[]){
-
-    // for the num. of nodes
-    int N;
-
-    // for the table2D
-    char **table2D;
-
-    // calling the function
-    read_graph_from_file1(argv[1], &N, &table2D);
-
-    // checking the returned array values
-    int values_of_1 = 0;
-    for (int i = 0; i < N; i++){
-        for (int j=0; j < N; j++){
-            printf("%d ", table2D[i][j]);
-            if ( table2D[i][j] == 1 ) values_of_1++;
-        }
-        printf("\n");
-    }
-
-    printf("Num. of Edges = 8 and Num. of values of 1 = %d\n", values_of_1);
-    printf("Ratio: %d\n", values_of_1/8);
-
-    // freeing memory
-    free(table2D);
-    free(*table2D);
-
-    return 0;
-}
+//int main(int argc, char *argv[]){
+//
+//    // for the num. of nodes
+//    int N;
+//
+//    // for the table2D
+//    char **table2D;
+//
+//    // calling the function
+//    read_graph_from_file1(argv[1], &N, &table2D);
+//
+//    // checking the returned array values
+//    int values_of_1 = 0;
+//    for (int i = 0; i < N; i++){
+//        for (int j=0; j < N; j++){
+//            printf("%d ", table2D[i][j]);
+//            if ( table2D[i][j] == 1 ) values_of_1++;
+//        }
+//        printf("\n");
+//    }
+//
+//    printf("Num. of Edges = 8 and Num. of values of 1 = %d\n", values_of_1);
+//    printf("Ratio: %d\n", values_of_1/8);
+//
+//    // freeing memory
+//    free(*table2D);
+//    free(table2D);
+//
+//    return 0;
+//}
