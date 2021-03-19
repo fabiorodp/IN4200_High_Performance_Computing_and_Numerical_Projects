@@ -50,9 +50,9 @@ void create_SNN_graph1(int N, char **table2D, int ***SNN_table)
         (*SNN_table)[i] = calloc(N, sizeof ***SNN_table);  // ***A = A[0][0][0]
 
 
-    for ( size_t i = 0; i < N; i++ )  // iterating rows
+    for ( size_t i = 0; i < N; i++ )  // locking rows
     {
-        for ( size_t j = 0; j < N; j++ )  // iterating columns
+        for ( size_t j = 0; j < N; j++ )  // locking cols
         {
             // checking if the node connection does not repeat i.e. 0-1 or 1-0
             if ( j <= i ) continue;
@@ -85,14 +85,6 @@ int main(int argc, char *argv[])
 
     // calling the function to read file and return table2D and N
     read_graph_from_file1(argv[1], &N, &table2D);
-
-//    // checking the returned array values
-//    for (int i = 0; i < N; i++){
-//        for (int j=0; j < N; j++){
-//            printf("%d ", table2D[i][j]);
-//        }
-//        printf("\n");
-//    }
 
     // declaration for the SNN_table
     int **SNN_table;

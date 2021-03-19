@@ -44,25 +44,46 @@ SNN_val equals [ 2,2,2,  2,2,2,  2,2,3,1,  2,2,3,1,  1,1 ]
 */
 void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
 {
-    for (size_t i = 0; i < N; i++)  // looping over row_ptr
+    // allocating SNN_val
+    // row_ptr[N+1] is the length of col_idx
+    (*SNN_val) = calloc(row_ptr[N+1], sizeof **SNN_val);
+
+    // sparse to dense matrix
+
+
+    for ( size_t e = 0; e < row_ptr[N+1]; e++ )
     {
-        size_t init_idx = row_ptr[i];
-        size_t end_idx = row_ptr[i+1];
+        for ( size_t i = 1; i < N+1; i++ )  // getting 1st batch
+        {
+            size_t start_b1 = row_ptr[i-1];
+            size_t end_b1 = row_ptr[i];
+            // printf("\n %lu %lu\n", start, end);  // -> ok
 
-        // printf("\n %d %d\n", init_idx, end_idx);
-
-        // looping over each batch of col_idx and sorting it out
-        for (size_t j = init_idx; j < end_idx; j++)
-            for (size_t k = j + 1; k <  end_idx; k++)
+            for ( size_t j = start_b1; j < end_b1; j++)
             {
-                if ( (*col_idx)[j] > (*col_idx)[k] )
+
+                int row_idx = 0;
+                for ( size_t ii = 1; ii < N+1; ii++ )  // getting 2nd batch
                 {
-                    int temp =  (*col_idx)[j];
-                    (*col_idx)[j] = (*col_idx)[k];
-                    (*col_idx)[k] = temp;
+                    if ( col_idx[j] == row_idx )
+                    {
+                        size_t start_b2 = row_ptr[ii-1];
+                        size_t end_b2 = row_ptr[ii];
+
+                        for ( size_t jj = start_b2; jj < end_b2; jj++)
+                        {
+                            if ( col_idx[j] == col_idx[jj] )
+                            {
+                                (*SNN_val)[e] += 1;
+                            }
+                        }
+                    }
+                    row_idx += 1;
                 }
             }
+        }
     }
+
 }
 
 
@@ -75,29 +96,23 @@ int main(int argc, char *argv[])
     // declaration for the num. of nodes
     int N;
 
-    // calling the function to read file and return row_ptr, col_idx and N
+    // calling the function to read file and return N, row_ptr and col_idx
     read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
 
-    // number of the edges of the example we will test on
-    int N_edges = 8;
-
-    // testing returned values for col_idx
-    for ( size_t i = 0; i < 2*N_edges; i++)
-        printf("%d", col_idx[i]);
-
-    printf("\n");
-
-    // testing returned values for row_ptr
-    for ( size_t i = 0; i < N+1; i++)
-        printf("%d", row_ptr[i]);
-
-    printf("\n");
+    // declaration for the SNN_val
+    int *SNN_val;
 
     // calling the function to return SNN_val
-    create_SNN_graph2(N, *row_ptr, *col_idx, **SNN_val)
+    create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
+
+    // testing returned values for SNN_val
+    // row_ptr[N+1] is the length of col_idx
+    for ( size_t i = 0; i < row_ptr[N+1]; i++)
+        printf("%d", SNN_val[i]);
 
     free(col_idx);
     free(row_ptr);
+    free(SNN_val);
 
     return 0;
 }
