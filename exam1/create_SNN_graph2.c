@@ -51,48 +51,23 @@ void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
     unsigned long count = 0;
     for (size_t i = 0; i < N; i++)  // looping over row_ptr
     {
-        printf("\ncount=%lu, i=%lu\n", count, i);
         size_t init_b1 = row_ptr[i];
         size_t end_b1 = row_ptr[i + 1];
 
-        printf("\ninit_b1=%lu end_b1=%lu\n", init_b1, end_b1);
-
         for (size_t j = init_b1; j < end_b1; j++)
-        {
-            for (size_t jj = 0; jj < N; jj++)  // row id
-            {
-                // checking if the nodes are connected
-                printf("\nctd? col_idx[j=%lu] == %d == jj=%lu\n",
-                       j, col_idx[j], jj);
-
+            for (size_t jj = 0; jj < N; jj++)
                 if ( col_idx[j] == jj )
                 {
-                    size_t init_b2 = row_ptr[jj];       // 3
-                    size_t end_b2 = row_ptr[jj + 1];    // 6
-
-                    printf("\n*init_b2=%lu end_b2=%lu\n", init_b2, end_b2);
+                    size_t init_b2 = row_ptr[jj];
+                    size_t end_b2 = row_ptr[jj + 1];
 
                     for (size_t ij = init_b1; ij < end_b1; ij++)
-                    {
                         for (size_t jjj = init_b2; jjj < end_b2; jjj++)
-                        {
-
-                            printf("\n**col_idx[ij]=%d == col_idx[jjj]=%d\n",
-                                   col_idx[ij],col_idx[jjj]);
-
                             if ( col_idx[ij] == col_idx[jjj] )
                                 (*SNN_val)[count] += 1;
-
-                            printf("\n(*SNN_val)[count=%lu]=%d\n",
-                                   count, (*SNN_val)[count]);
-                        }
-                    }
                     count++;
                 }
-            }
-        }
     }
-    printf("\n%lu\n", count);
 }
 
 
