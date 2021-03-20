@@ -44,46 +44,55 @@ SNN_val equals [ 2,2,2,  2,2,2,  2,2,3,1,  2,2,3,1,  1,1 ]
 */
 void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
 {
-    // allocating SNN_val
+    // allocating SNN_val that has the same length of col_idx
     // row_ptr[N+1] is the length of col_idx
     (*SNN_val) = calloc(row_ptr[N+1], sizeof **SNN_val);
 
-    // sparse to dense matrix
-
-
-    for ( size_t e = 0; e < row_ptr[N+1]; e++ )
+    unsigned long count = 0;
+    for (size_t i = 0; i < N; i++)  // looping over row_ptr
     {
-        for ( size_t i = 1; i < N+1; i++ )  // getting 1st batch
+        printf("\ncount=%lu, i=%lu\n", count, i);
+        size_t init_b1 = row_ptr[i];
+        size_t end_b1 = row_ptr[i + 1];
+
+        printf("\ninit_b1=%lu end_b1=%lu\n", init_b1, end_b1);
+
+        for (size_t j = init_b1; j < end_b1; j++)
         {
-            size_t start_b1 = row_ptr[i-1];
-            size_t end_b1 = row_ptr[i];
-            // printf("\n %lu %lu\n", start, end);  // -> ok
-
-            for ( size_t j = start_b1; j < end_b1; j++)
+            for (size_t jj = 0; jj < N; jj++)  // row id
             {
+                // checking if the nodes are connected
+                printf("\nctd? col_idx[j=%lu] == %d == jj=%lu\n",
+                       j, col_idx[j], jj);
 
-                int row_idx = 0;
-                for ( size_t ii = 1; ii < N+1; ii++ )  // getting 2nd batch
+                if ( col_idx[j] == jj )
                 {
-                    if ( col_idx[j] == row_idx )
-                    {
-                        size_t start_b2 = row_ptr[ii-1];
-                        size_t end_b2 = row_ptr[ii];
+                    size_t init_b2 = row_ptr[jj];       // 3
+                    size_t end_b2 = row_ptr[jj + 1];    // 6
 
-                        for ( size_t jj = start_b2; jj < end_b2; jj++)
+                    printf("\n*init_b2=%lu end_b2=%lu\n", init_b2, end_b2);
+
+                    for (size_t ij = init_b1; ij < end_b1; ij++)
+                    {
+                        for (size_t jjj = init_b2; jjj < end_b2; jjj++)
                         {
-                            if ( col_idx[j] == col_idx[jj] )
-                            {
-                                (*SNN_val)[e] += 1;
-                            }
+
+                            printf("\n**col_idx[ij]=%d == col_idx[jjj]=%d\n",
+                                   col_idx[ij],col_idx[jjj]);
+
+                            if ( col_idx[ij] == col_idx[jjj] )
+                                (*SNN_val)[count] += 1;
+
+                            printf("\n(*SNN_val)[count=%lu]=%d\n",
+                                   count, (*SNN_val)[count]);
                         }
                     }
-                    row_idx += 1;
+                    count++;
                 }
             }
         }
     }
-
+    printf("\n%lu\n", count);
 }
 
 
