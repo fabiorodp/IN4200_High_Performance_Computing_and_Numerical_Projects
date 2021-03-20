@@ -49,14 +49,14 @@ void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
     (*SNN_val) = calloc(row_ptr[N+1], sizeof **SNN_val);
 
     unsigned long count = 0;
-    for (size_t i = 0; i < N; i++)  // looping over row_ptr
+    for (size_t i = 0; i < N; i++)
     {
         size_t init_b1 = row_ptr[i];
         size_t end_b1 = row_ptr[i + 1];
 
         for (size_t j = init_b1; j < end_b1; j++)
             for (size_t jj = 0; jj < N; jj++)
-                if ( col_idx[j] == jj )
+                if ( col_idx[j] == jj )  // if the nodes are connected
                 {
                     size_t init_b2 = row_ptr[jj];
                     size_t end_b2 = row_ptr[jj + 1];
