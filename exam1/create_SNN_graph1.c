@@ -61,15 +61,8 @@ void create_SNN_graph1(int N, char **table2D, int ***SNN_table)
             if ( (table2D[i][j] == 0) && (table2D[j][i] == 0) ) continue;
 
             for ( size_t k = 0; k < N; k++ )
-            {
-                // printf("%lu %lu %lu\n", i, j, k);
-                // printf("Compare: %d %d\n", table2D[i][k], table2D[j][k]);
-
                 if ( (table2D[i][k] == 1) && (table2D[j][k] == 1) )
-                {
                     (*SNN_table)[i][j] = (*SNN_table)[j][i] += 1;
-                }
-            }
         }
     }
 }
