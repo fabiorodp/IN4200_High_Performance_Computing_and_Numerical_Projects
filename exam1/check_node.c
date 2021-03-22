@@ -50,9 +50,6 @@ SNN_val equals [ 2,2,2,  2,2,2,  2,2,3,1,  2,2,3,1,  1,1 ]
 void check_node(int node_id, int tau, int N, int *row_ptr, int *col_idx,
                 int *SNN_val)
 {
-    // store
-    int *store = malloc(row_ptr[N+1] * sizeof(int));
-
     // error if node_id >= N
     if ( node_id >= N )
     {
@@ -61,53 +58,64 @@ void check_node(int node_id, int tau, int N, int *row_ptr, int *col_idx,
         exit(1);
     }
 
+    // store nodes that are in the same cluster
+    // maximum possible are N minus 1 that is represented by the given node_id
+    int *cluster = malloc(N-1 * sizeof(int));
+
+    // hard-coding to not have any value equals node_id in cluster array
+    for ( size_t x = 0; x < (N-1); x++ )
+        cluster[x] = -1;
+
+    // finding the clustered nodes and storing in the cluster array
     int count = 0;
     for ( size_t i = 0; i < N; i++ )
     {
-//        printf("\n i=%lu, node_id=%d\n", i, node_id);
         if ( i != node_id ) continue;
 
         size_t init = row_ptr[i];
         size_t end = row_ptr[i + 1];
-//        printf("\n init=%lu, end=%lu\n", init, end);
 
         for ( size_t j = init; j < end; j++ )
-        {
             for ( size_t ii = 0; ii < N; ii++ )
-            {
-//                printf("\ncol_idx[j=%lu] == %d == ii==%lu\n",
-//                       j, col_idx[j], ii);
-
                 if ( col_idx[j] == ii )
                 {
                     size_t init2 = row_ptr[ii];
                     size_t end2 = row_ptr[ii + 1];
 
-//                    printf("\ninit2=%lu, end2=%lu\n", init2, end2);
-
                     for ( size_t jj = init2; jj < end2; jj++ )
-                    {
-
-//                        printf("\nSNN_val[jj=%lu]=%d >= tau=%d\n",
-//                               jj, SNN_val[jj], tau);
-
                         if ( SNN_val[jj] >= tau )
                         {
-                            store[count] = col_idx[jj];
-                            count++;
-//                            printf("\ncount=%d, col_idx[jj=%lu]=%d\n",
-//                                   count, jj, col_idx[jj]);
+                            // checking if the node is already stored
+                            int is_in = 0;
+                            for ( size_t x = 0; x < (N-1); x++ )
+                                if ( (cluster[x] == col_idx[jj])
+                                || (node_id== col_idx[jj]))
+                                    is_in = 1;
+
+                            if ( is_in == 0 )
+                            {
+                                cluster[count] = col_idx[jj];
+                                count++;
+                            }
                         }
-                    }
                 }
-            }
-        }
     }
 
-    for ( size_t z = 0; z < count; z++)
-        printf("\n %d \n", store[z]);
+    // reducing memory usage
+    cluster = realloc(cluster, count * sizeof(int));
 
-    free(store);
+    // printing clustered nodes
+    printf("\nNodes that form a cluster with node_id %d and tau %d: ",
+           node_id, tau);
+    for ( size_t z = 0; z < count; z++)
+    {
+        if ( z != 0 ) printf(",");
+        printf("%d", cluster[z]);
+    }
+    printf("\n");
+
+    // freeing memory
+    free(cluster);
 }
 
 int main(int argc, char *argv[])
@@ -134,7 +142,7 @@ int main(int argc, char *argv[])
         printf("%d", SNN_val[i]);
 
     // declaration for node_id
-    int node_id = 3;
+    int node_id = 4;
 
     // declaration for tau
     int tau = 3;
