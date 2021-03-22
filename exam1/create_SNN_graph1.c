@@ -68,35 +68,35 @@ void create_SNN_graph1(int N, char **table2D, int ***SNN_table)
 }
 
 
-int main(int argc, char *argv[])
-{
-    // declaration for the num. of nodes
-    int N;
-
-    // declaration for the table2D
-    char **table2D;
-
-    // calling the function to read file and return table2D and N
-    read_graph_from_file1(argv[1], &N, &table2D);
-
-    // declaration for the SNN_table
-    int **SNN_table;
-
-    // calling the function to return SNN_table
-    create_SNN_graph1(N, table2D, &SNN_table);
-
-    // checking the returned array values
-    for (int i = 0; i < N; i++){
-        for (int j=0; j < N; j++)
-            printf("%d ", SNN_table[i][j]);
-        printf("\n");
-    }
-
-    // freeing memory
-    free(*table2D);
-    free(table2D);
-    free(*SNN_table);
-    free(SNN_table);
-
-    return 0;
-}
+//int main(int argc, char *argv[])
+//{
+//    // declaration for the num. of nodes
+//    int N;
+//
+//    // declaration for the table2D
+//    char **table2D;
+//
+//    // calling the function to read file and return table2D and N
+//    read_graph_from_file1(argv[1], &N, &table2D);
+//
+//    // declaration for the SNN_table
+//    int **SNN_table;
+//
+//    // calling the function to return SNN_table
+//    create_SNN_graph1(N, table2D, &SNN_table);
+//
+//    // checking the returned array values
+//    for (int i = 0; i < N; i++){
+//        for (int j=0; j < N; j++)
+//            printf("%d ", SNN_table[i][j]);
+//        printf("\n");
+//    }
+//
+//    // freeing memory
+//    free(*table2D);
+//    free(table2D);
+//    free(*SNN_table);
+//    free(SNN_table);
+//
+//    return 0;
+//}
