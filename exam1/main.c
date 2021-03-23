@@ -10,13 +10,13 @@
 #include <stdio.h>  // printf
 #include <math.h>
 #include <time.h>
+#include "read_graph_from_file1.c"
 #include "read_graph_from_file2.c"
 
+
 /*
-File to test all the functions created in this exam 1.
+Main function to test all the functions created in this exam 1.
  */
-
-
 int main(int argc, char *argv[]){
 
     int *col_idx;

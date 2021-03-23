@@ -136,11 +136,6 @@ int main(int argc, char *argv[])
     // calling the function to return SNN_val
     create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
 
-    // testing returned values for SNN_val
-    // row_ptr[N+1] is the length of col_idx
-    for ( size_t i = 0; i < row_ptr[N+1]; i++)
-        printf("%d", SNN_val[i]);
-
     // declaration for node_id
     int node_id = 4;
 
