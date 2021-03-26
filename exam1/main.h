@@ -12,7 +12,8 @@ void printing_SNN_table(int **SNN_table, int N)
     printf("Please, type 'y' if you want to print SNN_table here:");
     scanf("%c", &ipt); getchar();
 
-    if (ipt=='y')
+    if ( ipt=='y' )
+    {
         printf("Printing SNN_table...\n");
         for (int i = 0; i < N; i++)
         {
@@ -21,6 +22,7 @@ void printing_SNN_table(int **SNN_table, int N)
 
             printf("\n");
         }
+    }
 }
 
 
