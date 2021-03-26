@@ -99,7 +99,7 @@ void check_node(int node_id, int tau, int N, int *row_ptr, int *col_idx,
     cluster = realloc(cluster, count * sizeof(int));
 
     // printing clustered nodes
-    printf("\nNodes that form a cluster with node_id %d and tau %d: ",
+    printf(">> The Nodes that form a cluster with node_id %d and tau %d: ",
            node_id, tau);
     for ( size_t z = 0; z < count; z++)
     {

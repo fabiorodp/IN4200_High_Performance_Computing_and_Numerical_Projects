@@ -10,7 +10,7 @@ void printing_SNN_table(int **SNN_table, int N)
 {
     char ipt = 'n';
     printf("Please, type 'y' if you want to print SNN_table here:");
-    scanf("%c", &ipt);
+    scanf("%c", &ipt); getchar();
 
     if (ipt=='y')
         printf("Printing SNN_table...\n");
@@ -39,7 +39,7 @@ void printing_SNN_val(int *SNN_val, int length)
 {
     char ipt = 'n';
     printf("Please, type 'y' if you want to print SNN_val here:");
-    scanf("%c", &ipt);
+    scanf("%c", &ipt); getchar();
 
     if (ipt=='y')
     {

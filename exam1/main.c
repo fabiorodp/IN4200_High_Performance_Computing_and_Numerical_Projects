@@ -148,11 +148,12 @@ void test_check_node(char *filename)
     // calling the function to return SNN_val
     create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
 
-    // declaration for node_id
-    int node_id = 4;
-
-    // declaration for tau
-    int tau = 3;
+    // user input for node_id and tau:
+    int node_id, tau;
+    printf("Please, give the node_id number:");
+    scanf("%d", &node_id); getchar();
+    printf("Now, the tau number:");
+    scanf("%d", &tau); getchar();
 
     // calling the function to print the nodes that are in the cluster
     check_node(node_id, tau, N, row_ptr, col_idx, SNN_val);
