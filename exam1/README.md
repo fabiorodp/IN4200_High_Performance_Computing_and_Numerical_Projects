@@ -12,7 +12,9 @@ ____
     
         clang -Xpreprocessor -fopenmp main.c main.h -lomp
 
-Run the Algorithm as follows:
+____
+
+## Run the Algorithm as follows:
 
 - Mac OS:
 
@@ -20,4 +22,4 @@ Run the Algorithm as follows:
 
 ____
 
-## Example of test:
+## Example of a test:
