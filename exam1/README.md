@@ -6,7 +6,7 @@ Final report is here:
 
 ____
 
-##Compile main.c as follows:
+## Compile main.c as follows:
 
 - Mac OS:
     
@@ -20,4 +20,4 @@ Run the Algorithm as follows:
 
 ____
 
-##Example of test:
+## Example of test:
