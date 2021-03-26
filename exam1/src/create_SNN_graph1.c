@@ -1,14 +1,9 @@
 // Author: Fabio Rodrigues Pereira
 // E-mail: fabior@uio.no
 
-// compiling & running
-// clang create_SNN_graph1.c  // without OpenMP
-// ./a.out
 
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
-#include <omp.h>
-#include "read_graph_from_file1.c"
 
 
 /*
@@ -43,60 +38,25 @@ nodes   0   1   2   3   4
 */
 void create_SNN_graph1(int N, char **table2D, int ***SNN_table)
 {
-    // allocating 2D array for SNNs
+    // allocating 2D array for SNN_table
     (*SNN_table) = calloc(N, sizeof **SNN_table);
-    for (size_t i = 0; i < N; i++)  // allocating 2D array for SNNs
+    for (size_t i = 0; i < N; i++)
         (*SNN_table)[i] = calloc(N, sizeof ***SNN_table);  // ***A = A[0][0][0]
 
-    //    for( x = 0; x < N*N; x++ )  // fusing nested for loops
-    //    {
-    //        i = x/N; j = x%N;
-
-    for (size_t i = 0; i < N; i++)  // rows >> parallelize the outer loop
-        for (size_t j = 0; j < N; j++)  // cols >> depend on the outer loop
+    for (size_t i = 0; i < N; i++)  // not dependent for loop construct
+        for (size_t j = 0; j < N; j++)  // depend on the outer loop
         {
             // checking if the node connection does not repeat i.e. 0-1 or 1-0
+            // continue clause used for avoiding unnecessary work for the loop
             if (j <= i) continue;
 
             // checking if both nodes are connected
+            // continue clause used for avoiding unnecessary work for the loop
             if ((table2D[i][j] == 0) && (table2D[j][i] == 0)) continue;
 
+            // assigning values in SNN_table
             for (size_t k = 0; k < N; k++)
                 if ((table2D[i][k] == 1) && (table2D[j][k] == 1))
                     (*SNN_table)[i][j] = (*SNN_table)[j][i] += 1;
         }
 }
-
-
-//int main(int argc, char *argv[])
-//{
-//    // declaration for the num. of nodes
-//    int N;
-//
-//    // declaration for the table2D
-//    char **table2D;
-//
-//    // calling the function to read file and return table2D and N
-//    read_graph_from_file1(argv[1], &N, &table2D);
-//
-//    // declaration for the SNN_table
-//    int **SNN_table;
-//
-//    // calling the function to return SNN_table
-//    create_SNN_graph1(N, table2D, &SNN_table);
-//
-//    // checking the returned array values
-//    for (int i = 0; i < N; i++){
-//        for (int j=0; j < N; j++)
-//            printf("%d ", SNN_table[i][j]);
-//        printf("\n");
-//    }
-//
-//    // freeing memory
-//    free(*table2D);
-//    free(table2D);
-//    free(*SNN_table);
-//    free(SNN_table);
-//
-//    return 0;
-//}

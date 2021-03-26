@@ -1,14 +1,9 @@
 // Author: Fabio Rodrigues Pereira
 // E-mail: fabior@uio.no
 
-// compiling & running
-// gcc read_graph_from_file2.c
-// ./a.out
 
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
-#include <math.h>
-#include <time.h>
 
 
 /*
@@ -62,9 +57,9 @@ start in array val (not needed for binary values).
 int **col_idx := records the original column position of the all non-zeros
 values.
 */
-void read_graph_from_file2(
-        char *filename, int *N, int **row_ptr, int **col_idx){
-
+void read_graph_from_file2(char *filename, int *N, int **row_ptr,
+                           int **col_idx)
+{
     FILE *file;
 
     // opening file
@@ -81,7 +76,6 @@ void read_graph_from_file2(
     unsigned int N_edges;
     while ( fgets(ln, sizeof ln, file) )
         if (sscanf(ln, "#%*s%d%*s%u\n", N, &N_edges)) break;  // efficiency
-        // printf("%d %d\n", *N, N_edges);
     
     // allocating arrays
     (*col_idx) = calloc( 2 * N_edges, sizeof **col_idx );
@@ -98,10 +92,6 @@ void read_graph_from_file2(
             unsigned int temp1, temp2;  // not incur in memory storage traffic
             sscanf(ln, "%u %u\n", &temp1, &temp2);
 
-            // printf("%u %u\n", temp1, temp2);
-            // printf("comparision: temp1:%u node:%d\n", temp1, node);
-            // printf("comparision: temp2:%u node:%d\n", temp2, node);
-
             if ( temp1 == node )
             {
                 (*col_idx)[count] = temp2;
@@ -113,8 +103,6 @@ void read_graph_from_file2(
                 count++;
             }
         }
-        
-        // printf("idx%u\n\n", idx);
         
         // assigning the count
         (*row_ptr)[node+1] = count;
@@ -128,8 +116,6 @@ void read_graph_from_file2(
     {
         size_t init_idx = (*row_ptr)[i];
         size_t end_idx = (*row_ptr)[i+1];
-
-        // printf("\n %d %d\n", init_idx, end_idx);
 
         // looping over each batch of col_idx and sorting it out
         for (size_t j = init_idx; j < end_idx; j++)
@@ -145,32 +131,3 @@ void read_graph_from_file2(
     }
 
 }
-
-//int main(int argc, char *argv[]){
-//    int *col_idx;
-//    int *row_ptr;
-//    int N;
-//
-//    // calling function
-//    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
-//
-//    // number of the edges
-//    int N_edges = row_ptr[N+1]/2;
-//
-//    // testing returned values for col_idx
-//    for ( size_t i = 0; i < 2*N_edges; i++)
-//        printf("%d", col_idx[i]);
-//
-//    printf("\n");
-//
-//    // testing returned values for row_ptr
-//    for ( size_t i = 0; i < N+1; i++)
-//        printf("%d", row_ptr[i]);
-//
-//    printf("\n");
-//
-//    free(col_idx);
-//    free(row_ptr);
-//
-//    return 0;
-//}

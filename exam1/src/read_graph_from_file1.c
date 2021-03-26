@@ -1,15 +1,9 @@
 // Author: Fabio Rodrigues Pereira
 // E-mail: fabior@uio.no
 
-// compiling & running
-// gcc read_graph_from_file1.c
-// ./a.out
 
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
-#include <math.h>
-#include <time.h>
-// #include <string.h>
 
 
 /*
@@ -47,8 +41,8 @@ char *filename: file containing a connectivity graph.
 int *N := the number of nodes.
 char ***table2D := 2D table of correct dimension.
 */
-void read_graph_from_file1(char *filename, int *N, char ***table2D){
-
+void read_graph_from_file1(char *filename, int *N, char ***table2D)
+{
     // declaring variable pointer file
     FILE *file;
 
@@ -66,8 +60,6 @@ void read_graph_from_file1(char *filename, int *N, char ***table2D){
     while ( fgets(ln, sizeof ln, file) )
         if (sscanf(ln, "# Nodes: %d", N) == 1) break;  // efficiency
     
-    //printf("%d\n", *N);
-    
     // allocating 2D pointer arrays
     (*table2D) = calloc(*N, sizeof **table2D);  // *A = A[0], **A = A[0][0] 
     for ( int i = 0; i < *N; i++ )
@@ -76,44 +68,11 @@ void read_graph_from_file1(char *filename, int *N, char ***table2D){
     // reading and assigning specific values to pointer arrays
     while ( fgets(ln, sizeof ln, file) ) {
         if (ln[0] == '#') continue;  // efficiency
-        unsigned int temp1, temp2;  // to not incur in memory storage trafic
+        unsigned int temp1, temp2;  // to not incur in memory storage traffic
         sscanf(ln, "%u %u\n", &temp1, &temp2);
-        // printf("%d %d\n", temp1, temp2);
         *(*(*table2D+temp1)+temp2) = *(*(*table2D+temp2)+temp1) += 1;
     }
 
     // closing file
     fclose(file);
 }
-
-
-//int main(int argc, char *argv[]){
-//
-//    // for the num. of nodes
-//    int N;
-//
-//    // for the table2D
-//    char **table2D;
-//
-//    // calling the function
-//    read_graph_from_file1(argv[1], &N, &table2D);
-//
-//    // checking the returned array values
-//    int values_of_1 = 0;
-//    for (int i = 0; i < N; i++){
-//        for (int j=0; j < N; j++){
-//            printf("%d ", table2D[i][j]);
-//            if ( table2D[i][j] == 1 ) values_of_1++;
-//        }
-//        printf("\n");
-//    }
-//
-//    printf("Num. of Edges = 8 and Num. of values of 1 = %d\n", values_of_1);
-//    printf("Ratio: %d\n", values_of_1/8);
-//
-//    // freeing memory
-//    free(*table2D);
-//    free(table2D);
-//
-//    return 0;
-//}

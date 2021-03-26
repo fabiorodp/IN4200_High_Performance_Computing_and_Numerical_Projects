@@ -1,13 +1,9 @@
 // Author: Fabio Rodrigues Pereira
 // E-mail: fabior@uio.no
 
-// compiling & running
-// gcc create_SNN_graph2.c
-// ./a.out
 
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
-#include "read_graph_from_file2.c"
 
 
 /*
@@ -46,9 +42,9 @@ void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
     // row_ptr[N+1] is the length of col_idx
     (*SNN_val) = calloc(row_ptr[N+1], sizeof **SNN_val);
 
+    // serialized loop construct to assign values in SNN_val
     size_t i, j, jj, ij, jjj;
     unsigned long count = 0;
-
     for ( i = 0; i < N; i++ )
         for ( j = row_ptr[i]; j < row_ptr[i + 1]; j++ )
             for ( jj = 0; jj < N; jj++ )
@@ -61,34 +57,3 @@ void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
                     count++;
                 }
 }
-
-
-//int main(int argc, char *argv[])
-//{
-//    // declaration for the CRS matrix
-//    int *col_idx;
-//    int *row_ptr;
-//
-//    // declaration for the num. of nodes
-//    int N;
-//
-//    // calling the function to read file and return N, row_ptr and col_idx
-//    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
-//
-//    // declaration for the SNN_val
-//    int *SNN_val;
-//
-//    // calling the function to return SNN_val
-//    create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
-//
-//    // testing returned values for SNN_val
-//    // row_ptr[N+1] is the length of col_idx
-//    for ( size_t i = 0; i < row_ptr[N+1]; i++)
-//        printf("%d", SNN_val[i]);
-//
-//    free(col_idx);
-//    free(row_ptr);
-//    free(SNN_val);
-//
-//    return 0;
-//}

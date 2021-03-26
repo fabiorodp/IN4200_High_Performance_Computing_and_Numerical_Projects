@@ -1,15 +1,9 @@
 // Author: Fabio Rodrigues Pereira
 // E-mail: fabior@uio.no
 
-// compiling & running
-// gcc check_node.c
-// ./a.out
 
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
-#include <math.h>
-#include <time.h>
-#include "create_SNN_graph2.c"
 
 
 /*
@@ -116,34 +110,4 @@ void check_node(int node_id, int tau, int N, int *row_ptr, int *col_idx,
 
     // freeing memory
     free(cluster);
-}
-
-int main(int argc, char *argv[])
-{
-    // declaration for the CRS matrix
-    int *col_idx;
-    int *row_ptr;
-
-    // declaration for the num. of nodes
-    int N;
-
-    // calling the function to read file and return N, row_ptr and col_idx
-    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
-
-    // declaration for the SNN_val
-    int *SNN_val;
-
-    // calling the function to return SNN_val
-    create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
-
-    // declaration for node_id
-    int node_id = 4;
-
-    // declaration for tau
-    int tau = 3;
-
-    // calling the function to print the nodes that are in the cluster
-    check_node(node_id, tau, N, row_ptr, col_idx, SNN_val);
-
-    return 0;
 }
