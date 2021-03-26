@@ -76,25 +76,16 @@ void test_read_and_create_SNN_graph1(char *filename)
 }
 
 
-void test_read_and_create_SNN_graph2(char *filename)
+void test_read_and_create_SNN_graph2(char *filename, int *N, int **col_idx,
+                                     int **row_ptr, int **SNN_val)
 {
-    // declaration for the num. of nodes
-    int N;
-
-    // declaration for the CRS matrix
-    int *col_idx;
-    int *row_ptr;
-
     // calling the function to read file and return N, row_ptr and col_idx
-    read_graph_from_file2(filename, &N, &row_ptr, &col_idx);
-
-    // declaration for the SNN_val
-    int *SNN_val;
+    read_graph_from_file2(filename, &(*N), &(*row_ptr), &(*col_idx));
 
     printf("Creating SNN graph 2 without OMP...\n");
     // calling the function to return SNN_val
     clock_t t0 = clock();
-    create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
+    create_SNN_graph2((*N), (*row_ptr), (*col_idx), &(*SNN_val));
     clock_t t1 = clock();
 
     double elapsed_time = (double)(t1-t0)/CLOCKS_PER_SEC;
@@ -106,7 +97,7 @@ void test_read_and_create_SNN_graph2(char *filename)
     printf("Creating SNN graph 2 with OMP...\n");
     // calling the function to return SNN_val
     t0 = clock();
-    create_SNN_graph2_omp(N, row_ptr, col_idx, &SNN_val_omp);
+    create_SNN_graph2_omp((*N), (*row_ptr), (*col_idx), &SNN_val_omp);
     t1 = clock();
 
     double elapsed_time1 = (double)(t1-t0)/CLOCKS_PER_SEC;
@@ -118,36 +109,17 @@ void test_read_and_create_SNN_graph2(char *filename)
 
     // Comparing if SNN_val and SNN_val_omp are equals
     printf("Comparing if SNN_val and SNN_val_omp are equals:\n");
-    comparing_SNN_val(SNN_val, SNN_val_omp, row_ptr[N+1]);
+    comparing_SNN_val((*SNN_val), SNN_val_omp, (*row_ptr)[*N+1]);
 
     // checking if the user want to print SNN_val
-    printing_SNN_val(SNN_val, row_ptr[N+1]);
+    printing_SNN_val((*SNN_val), (*row_ptr)[*N+1]);
 
-    free(col_idx);
-    free(row_ptr);
-    free(SNN_val);
     free(SNN_val_omp);
 }
 
 
-void test_check_node(char *filename)
+void test_check_node(int N, int *col_idx, int *row_ptr, int *SNN_val)
 {
-    // declaration for the num. of nodes
-    int N;
-
-    // declaration for the CRS matrix
-    int *col_idx;
-    int *row_ptr;
-
-    // calling the function to read file and return N, row_ptr and col_idx
-    read_graph_from_file2(filename, &N, &row_ptr, &col_idx);
-
-    // declaration for the SNN_val
-    int *SNN_val;
-
-    // calling the function to return SNN_val
-    create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
-
     // user input for node_id and tau:
     int node_id, tau;
     printf("Please, give the node_id number:");
@@ -157,10 +129,6 @@ void test_check_node(char *filename)
 
     // calling the function to print the nodes that are in the cluster
     check_node(node_id, tau, N, row_ptr, col_idx, SNN_val);
-
-    free(col_idx);
-    free(row_ptr);
-    free(SNN_val);
 }
 
 
@@ -169,11 +137,25 @@ int main(int argc, char *argv[])
     printf("\nTesting read_graph_from_file1.c and create_SNN_graph1.c.....\n");
     test_read_and_create_SNN_graph1(argv[1]);
 
+    // declaration for the num. of nodes
+    int N;
+
+    // declaration for the CRS matrix
+    int *col_idx;
+    int *row_ptr;
+
+    // declaration for the SNN_val
+    int *SNN_val;
+
     printf("\nTesting read_graph_from_file2.c and create_SNN_graph2.c.....\n");
-    test_read_and_create_SNN_graph2(argv[1]);
+    test_read_and_create_SNN_graph2(argv[1], &N, &col_idx, &row_ptr, &SNN_val);
 
     printf("\n\nTesting check_node.c......................................\n");
-    test_check_node(argv[1]);
+    test_check_node(N, col_idx, row_ptr, SNN_val);
+
+    free(col_idx);
+    free(row_ptr);
+    free(SNN_val);
 
     return 0;
 }
