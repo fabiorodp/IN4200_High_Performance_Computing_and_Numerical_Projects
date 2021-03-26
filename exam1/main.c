@@ -137,15 +137,8 @@ int main(int argc, char *argv[])
     printf("\nTesting read_graph_from_file1.c and create_SNN_graph1.c.....\n");
     test_read_and_create_SNN_graph1(argv[1]);
 
-    // declaration for the num. of nodes
-    int N;
-
-    // declaration for the CRS matrix
-    int *col_idx;
-    int *row_ptr;
-
-    // declaration for the SNN_val
-    int *SNN_val;
+    // declaration for the num. of nodes, CRS matrices and SNN_val
+    int N, *col_idx, *row_ptr, *SNN_val;
 
     printf("\nTesting read_graph_from_file2.c and create_SNN_graph2.c.....\n");
     test_read_and_create_SNN_graph2(argv[1], &N, &col_idx, &row_ptr, &SNN_val);
