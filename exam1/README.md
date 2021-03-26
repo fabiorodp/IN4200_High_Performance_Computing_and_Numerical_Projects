@@ -1,4 +1,4 @@
-# UiO:IN4200 - Exam 1
+# UiO:IN4200 - Exam 1 - Spring2021
 
 The exam is here:
 
