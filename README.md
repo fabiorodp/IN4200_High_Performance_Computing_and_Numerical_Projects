@@ -1,2 +1,2 @@
-# IN4200_High_Performance_Computing_and_Numerical_Projects
+# UiO:IN4200 - High Performance Computing and Numerical Projects
 Assignments delivered for master's level curse at Universitetet i Oslo.
