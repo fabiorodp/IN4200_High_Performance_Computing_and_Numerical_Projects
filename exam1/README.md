@@ -1,5 +1,7 @@
 # UiO:IN4200 - Exam 1 - Spring2021
 
+Candidate number:
+
 The exam is here:
 
 Final report is here:
@@ -18,7 +20,7 @@ ____
 
 - Mac OS:
 
-        ./a.out [path_for_data]
+        ./a.out [connectivity_graphy_data_path]
 
 ____
 
