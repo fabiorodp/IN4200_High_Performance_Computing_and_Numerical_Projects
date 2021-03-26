@@ -7,8 +7,6 @@
 
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
-#include <math.h>
-#include <time.h>
 #include "read_graph_from_file2.c"
 
 
@@ -19,8 +17,8 @@ Compressed Row Storage:
 Inputs
 ~~~~~~~~~~~~~~~~~~~~~~~~
 int N: Number of Nodes.
-int *row_ptr:
-int *col_idx:
+int *row_ptr: 1D Array with the rows pointers.
+int *col_idx: 1D Array with the columns indices.
 
 Output
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,26 +46,20 @@ void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
     // row_ptr[N+1] is the length of col_idx
     (*SNN_val) = calloc(row_ptr[N+1], sizeof **SNN_val);
 
+    size_t i, j, jj, ij, jjj;
     unsigned long count = 0;
-    for (size_t i = 0; i < N; i++)
-    {
-        size_t init_b1 = row_ptr[i];
-        size_t end_b1 = row_ptr[i + 1];
 
-        for (size_t j = init_b1; j < end_b1; j++)
-            for (size_t jj = 0; jj < N; jj++)
+    for ( i = 0; i < N; i++ )
+        for ( j = row_ptr[i]; j < row_ptr[i + 1]; j++ )
+            for ( jj = 0; jj < N; jj++ )
                 if ( col_idx[j] == jj )  // if the nodes are connected
                 {
-                    size_t init_b2 = row_ptr[jj];
-                    size_t end_b2 = row_ptr[jj + 1];
-
-                    for (size_t ij = init_b1; ij < end_b1; ij++)
-                        for (size_t jjj = init_b2; jjj < end_b2; jjj++)
+                    for ( ij = row_ptr[i]; ij < row_ptr[i + 1]; ij++ )
+                        for ( jjj = row_ptr[jj]; jjj < row_ptr[jj + 1]; jjj++ )
                             if ( col_idx[ij] == col_idx[jjj] )
                                 (*SNN_val)[count] += 1;
                     count++;
                 }
-    }
 }
 
 

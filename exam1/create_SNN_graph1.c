@@ -2,13 +2,12 @@
 // E-mail: fabior@uio.no
 
 // compiling & running
-// gcc create_SNN_graph1.c
+// clang create_SNN_graph1.c  // without OpenMP
 // ./a.out
 
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
-#include <math.h>
-#include <time.h>
+#include <omp.h>
 #include "read_graph_from_file1.c"
 
 
@@ -46,25 +45,26 @@ void create_SNN_graph1(int N, char **table2D, int ***SNN_table)
 {
     // allocating 2D array for SNNs
     (*SNN_table) = calloc(N, sizeof **SNN_table);
-    for ( size_t i = 0; i < N; i++ )
+    for (size_t i = 0; i < N; i++)  // allocating 2D array for SNNs
         (*SNN_table)[i] = calloc(N, sizeof ***SNN_table);  // ***A = A[0][0][0]
 
+    //    for( x = 0; x < N*N; x++ )  // fusing nested for loops
+    //    {
+    //        i = x/N; j = x%N;
 
-    for ( size_t i = 0; i < N; i++ )  // locking rows
-    {
-        for ( size_t j = 0; j < N; j++ )  // locking cols
+    for (size_t i = 0; i < N; i++)  // rows >> parallelize the outer loop
+        for (size_t j = 0; j < N; j++)  // cols >> depend on the outer loop
         {
             // checking if the node connection does not repeat i.e. 0-1 or 1-0
-            if ( j <= i ) continue;
+            if (j <= i) continue;
 
             // checking if both nodes are connected
-            if ( (table2D[i][j] == 0) && (table2D[j][i] == 0) ) continue;
+            if ((table2D[i][j] == 0) && (table2D[j][i] == 0)) continue;
 
-            for ( size_t k = 0; k < N; k++ )
-                if ( (table2D[i][k] == 1) && (table2D[j][k] == 1) )
+            for (size_t k = 0; k < N; k++)
+                if ((table2D[i][k] == 1) && (table2D[j][k] == 1))
                     (*SNN_table)[i][j] = (*SNN_table)[j][i] += 1;
         }
-    }
 }
 
 
