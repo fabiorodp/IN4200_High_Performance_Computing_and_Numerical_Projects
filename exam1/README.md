@@ -1,10 +1,10 @@
 # UiO:IN4200 - Exam 1 - Spring2021
 
-Candidate number:
+Candidate number: 15841
 
-The exam is here:
+The exam is here: [exam_tasks.pdf]()
 
-Final report is here:
+Final report is here: [final_report.pdf]()
 
 ____
 ## Introduction and Structure:
@@ -28,8 +28,8 @@ Our job here is to develop algorithms to read, create SNN, and efficiently ident
 |  |  |  └── read_graph_from_file1.c
 |  |  |  └── read_graph_from_file2.c
 |  |  └── report
-|  |  |  └── exam_tasks.txt
-|  |  |  └── final_report.txt
+|  |  |  └── exam_tasks.pdf
+|  |  |  └── final_report.pdf
 |  |  └── main.c
 |  |  └── main.h
 |  |  └── README.md
