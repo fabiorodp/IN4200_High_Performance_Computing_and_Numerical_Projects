@@ -10,10 +10,10 @@
 Reading Connectivity Graphs - version 2 - Compressed Row Storage:
 
 What does this function do:
-1. This function reads a text file that contains a connectivity graph;
+1. Reads a text file that contains a connectivity graph;
 2. Outputs the number of nodes through N;
-3. Assign values for the row_ptr, col_idx 1D arrays inside the function;
-4. Passes the arrays out out (thus double pointer as type).
+3. Allocate and assign values for the row\_ptr, col\_idx 1D arrays inside the function;
+4. Passes the arrays out (thus double pointer as type).
 
 Justifications
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,15 +40,7 @@ Specifies:
         |-> (*row_ptr) = malloc(N+1 * sizeof row_ptr)
         |-> "dissecting" the array col_idx with respect to the diff nodes.
 
-Example format:
-~~~~~~~~~~~~~~~~~~~~~~~~
-Examples of col_idx and row_ptr for the Connectivity Graphs file in 
-data/graph_example.txt:
-
-col_idx: 1,2,3, 0,2,3, 0,1,3,4, 0,1,2,4, 2,3
-row_ptr: 0,3,6,10,14,16
-
-Arguments:
+Input and Output:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 char *filename: file containing a connectivity graph.
 int *N := the number of nodes.
@@ -56,6 +48,14 @@ int **row_ptr := of length N + 1 contains the indices at which new rows
 start in array val (not needed for binary values).
 int **col_idx := records the original column position of the all non-zeros
 values.
+
+Example format:
+~~~~~~~~~~~~~~~~~~~~~~~~
+Examples of col_idx and row_ptr for the Connectivity Graphs file in
+data/graph_example.txt:
+
+col_idx: 1,2,3, 0,2,3, 0,1,3,4, 0,1,2,4, 2,3
+row_ptr: 0,3,6,10,14,16
 */
 void read_graph_from_file2(char *filename, int *N, int **row_ptr,
                            int **col_idx)
@@ -81,15 +81,18 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr,
     (*col_idx) = calloc( 2 * N_edges, sizeof **col_idx );
     (*row_ptr) = calloc( (*N + 1), sizeof **row_ptr );
 
+    // declaring variables
+    size_t node;
+    unsigned int temp1, temp2, count = 0;
+
     // assigning values to the arrays
-    unsigned int count = 0;
-    for (size_t node = 0; node < (*N)+1; node++)  // to keep arrays' order
+    for ( node = 0; node < (*N)+1; node++ )  // to keep arrays' order
     {   
         while ( fgets(ln, sizeof ln, file) ) 
         {
             if (ln[0] == '#') continue;  // efficiency
             
-            unsigned int temp1, temp2;  // not incur in memory storage traffic
+            // not incur in memory storage traffic
             sscanf(ln, "%u %u\n", &temp1, &temp2);
 
             if ( temp1 == node )
@@ -113,21 +116,12 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr,
 
     // sorting col_idx array
     for (size_t i = 0; i < *N; i++)  // looping over row_ptr
-    {
-        size_t init_idx = (*row_ptr)[i];
-        size_t end_idx = (*row_ptr)[i+1];
-
-        // looping over each batch of col_idx and sorting it out
-        for (size_t j = init_idx; j < end_idx; j++)
-            for (size_t k = j + 1; k <  end_idx; k++)
-            {
+        for (size_t j = (*row_ptr)[i]; j < (*row_ptr)[i+1]; j++)
+            for (size_t k = j + 1; k <  (*row_ptr)[i+1]; k++)
                 if ( (*col_idx)[j] > (*col_idx)[k] )
                 {
                     int temp =  (*col_idx)[j];
                     (*col_idx)[j] = (*col_idx)[k];
                     (*col_idx)[k] = temp;
                 }
-            }
-    }
-
 }
