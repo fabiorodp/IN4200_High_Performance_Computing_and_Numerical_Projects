@@ -20,12 +20,21 @@ Specifies:
 binary table2D N x N of char values (CG) or int values (SNN)
 N:=num_nodes
 table2D[i][j] = table2D[j][i]
-table2D[i][i] = 0 := a node cannot be a nearst neighbor of itself
+table2D[i][i] = 0 := a node cannot be a nearest neighbor of itself
 the # of values=1 in table2D is twice the # of edges
+
+Input:
+~~~~~~~~~~~~~~~~~~~~~~~~
+char *filename: file containing a connectivity graph.
+
+Output:
+~~~~~~~~~~~~~~~~~~~~~~~~
+int *N := the number of nodes.
+char ***table2D := 2D table of correct dimension.
 
 Example format:
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Example of table2D for the Connectivity Graphs file in 
+Example of table2D for the Connectivity Graphs file in
 data/graph_example.txt:
 
 nodes   0   1   2   3   4
@@ -34,12 +43,6 @@ nodes   0   1   2   3   4
 2       1   1   0   1   1
 3       1   1   1   0   1
 4       0   0   1   1   0
-
-Arguments:
-~~~~~~~~~~~~~~~~~~~~~~~~
-char *filename: file containing a connectivity graph.
-int *N := the number of nodes.
-char ***table2D := 2D table of correct dimension.
 */
 void read_graph_from_file1(char *filename, int *N, char ***table2D)
 {
@@ -70,7 +73,7 @@ void read_graph_from_file1(char *filename, int *N, char ***table2D)
         if (ln[0] == '#') continue;  // efficiency
         unsigned int temp1, temp2;  // to not incur in memory storage traffic
         sscanf(ln, "%u %u\n", &temp1, &temp2);
-        *(*(*table2D+temp1)+temp2) = *(*(*table2D+temp2)+temp1) += 1;
+        *(*(*table2D+temp1)+temp2) = *(*(*table2D+temp2)+temp1) = 1;
     }
 
     // closing file
