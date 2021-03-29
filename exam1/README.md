@@ -2,9 +2,9 @@
 
 Candidate number: 15841
 
-The exam is here: [exam_tasks.pdf]()
+The exam is here: [exam_tasks.pdf](https://github.com/fabiorodp/IN4200_High_Performance_Computing_and_Numerical_Projects/blob/main/exam1/report/exam_tasks.pdf)
 
-Final report is here: [final_report.pdf]()
+Final report is here: [final_report.pdf](https://github.com/fabiorodp/IN4200_High_Performance_Computing_and_Numerical_Projects/blob/main/exam1/report/final_report.pdf)
 
 ____
 ## Introduction and Structure:
