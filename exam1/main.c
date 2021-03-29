@@ -152,8 +152,8 @@ void test_read_and_create_SNN_graph2(char *filename, int *N, int **col_idx,
     printf("Please, type 'y' if you want to print SNN_val here:");
     printing_SNN_val((*SNN_val), (*row_ptr)[*N+1]);
 
-    // checking if the user want to print SNN_val
-    printf("\nPlease, type 'y' if you want to print SNN_val here:");
+    // checking if the user want to print SNN_val_omp
+    printf("\nPlease, type 'y' if you want to print SNN_val_omp here:");
     printing_SNN_val(SNN_val_omp, (*row_ptr)[*N+1]);
 
     free(SNN_val_omp);
