@@ -16,7 +16,7 @@ void create_SNN_graph2_omp(int N, int *row_ptr, int *col_idx, int **SNN_val)
     size_t z, x, i, j, row_nr;
     unsigned long count;
 
-    #pragma omp parallel for private(z, x, i, j, row_nr) reduction(+:count)
+#pragma omp parallel for private(z, x, i, j, row_nr) reduction(+:count)
     for ( z = 0; z < row_ptr[N + 1]; z++ )
     {
         count = 0;
