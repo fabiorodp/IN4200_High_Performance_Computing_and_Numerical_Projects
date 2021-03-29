@@ -18,11 +18,11 @@ void create_SNN_graph1_omp(int N, char **table2D, int ***SNN_table)
 #pragma omp parallel
     {
 #pragma omp for private(z)
-        for (z = 0; z < N; z++)  // not dependent on anybody
+        for (z = 0; z < N; z++)  // not dependent on anything
             (*SNN_table)[z] = calloc(N, sizeof ***SNN_table);
 
 #pragma omp for private(i, j, k) schedule(dynamic)
-        for (i = 0; i < N; i++)  // not dependent on anybody
+        for (i = 0; i < N; i++)  // not dependent on anything
             for (j = 0; j < N; j++)  // depends on i (the outer loop)
             {
                 // checking if the node connection does not repeat i.e. 0-1 or 1-0

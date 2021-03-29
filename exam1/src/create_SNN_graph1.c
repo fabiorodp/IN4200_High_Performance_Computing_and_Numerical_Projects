@@ -43,7 +43,7 @@ void create_SNN_graph1(int N, char **table2D, int ***SNN_table)
     for (size_t i = 0; i < N; i++)
         (*SNN_table)[i] = calloc(N, sizeof ***SNN_table);  // ***A = A[0][0][0]
 
-    for (size_t i = 0; i < N; i++)  // not dependent for loop construct
+    for (size_t i = 0; i < N; i++)  // not dependent on anything
         for (size_t j = 0; j < N; j++)  // depend on the outer loop
         {
             // checking if the node connection does not repeat i.e. 0-1 or 1-0
