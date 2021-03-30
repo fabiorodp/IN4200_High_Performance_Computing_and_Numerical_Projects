@@ -90,4 +90,6 @@ int main(int argc, char *argv[])
     free(col_idx);
     free(row_ptr);
     free(SNN_val);
+
+    return 0;
 }

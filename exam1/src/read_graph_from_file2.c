@@ -17,25 +17,25 @@ What does this function do:
 
 Justifications
 ~~~~~~~~~~~~~~~~~~~~~~~~
-1st. More memory efficient than version 1 for the case where the 
-number of edges (N_edges) are smaller than N*N by orders of magnitude, 
-because the numerical values of the table2D (sparse matrix) from 
-version 1 are mostly zeros. It is a waste of float-point operations 
-when the sparse matrix is used in the way presented in version 1. 
-Besides, it is a waste of memory storage when a sparse matrix is 
+1st. More memory efficient than version 1 for the case where the
+number of edges (N_edges) are smaller than N*N by orders of magnitude,
+because the numerical values of the table2D (sparse matrix) from
+version 1 are mostly zeros. It is a waste of float-point operations
+when the sparse matrix is used in the way presented in version 1.
+Besides, it is a waste of memory storage when a sparse matrix is
 allocated as a 2D array.
 
-2nd. CRS only stores the nonzero values and avoids multiplication 
+2nd. CRS only stores the nonzero values and avoids multiplication
 with zeros.
 
 Specifies:
 ~~~~~~~~~~~~~~~~~~~~~~~~
-- Uses two array1D: 
+- Uses two array1D:
     -> int **col_idx:
         |-> (*col_idx) = malloc(2*N_edges * sizeof col_idx)
-        |-> consecutively stores for all nodes the indices of their 
+        |-> consecutively stores for all nodes the indices of their
             nearest neighbors.
-    
+
     -> int **row_ptr:
         |-> (*row_ptr) = malloc(N+1 * sizeof row_ptr)
         |-> "dissecting" the array col_idx with respect to the diff nodes.
@@ -78,9 +78,8 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr,
         if (sscanf(ln, "#%*s%d%*s%u\n", N, &N_edges)) break;  // efficiency
     
     // allocating arrays
-    printf("\nooooo %lu %lu\n", sizeof(*col_idx), sizeof(*row_ptr));
-    (*col_idx) = calloc( 2 * N_edges, sizeof *col_idx );
-    (*row_ptr) = calloc( (*N + 1), sizeof *row_ptr );
+    (*col_idx) = calloc( 2 * N_edges, sizeof **col_idx );
+    (*row_ptr) = calloc( (*N + 1), sizeof **row_ptr );
 
     // declaring variables
     size_t node;
@@ -125,4 +124,25 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr,
                     (*col_idx)[j] = (*col_idx)[k];
                     (*col_idx)[k] = temp;
                 }
+}
+
+
+int main(int argc, char *argv[])
+{
+    // declaration for the num. of nodes, CRS matrices and SNN_val
+    int N, *col_idx, *row_ptr, *SNN_val;
+
+    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
+
+    for (size_t i = 0; i < row_ptr[N + 1]; i++)
+        printf("%d", col_idx[i]);
+
+    printf("\n");
+
+    for (size_t i = 0; i < N + 1; i++)
+        printf("%d", row_ptr[i]);
+
+    free(row_ptr);
+    free(col_idx);
+    return 0;
 }
