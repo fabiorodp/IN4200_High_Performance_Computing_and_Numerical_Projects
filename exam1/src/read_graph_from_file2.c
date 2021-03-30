@@ -115,25 +115,25 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
         rewind(file);
     }
 
-    for ( size_t i=0; i < 2 * N_edges; i++ )
-        printf("%d", (*col_idx)[i]);
-
-    printf("\n");
-
-    for ( size_t i=0; i < (*N + 1); i++ )
-        printf("%d", (*row_ptr)[i]);
-
+//    for ( size_t i=0; i < 2 * N_edges; i++ )
+//        printf("%d", (*col_idx)[i]);
 //
-//    // sorting col_idx array
-//    for (size_t i = 0; i < *N; i++)  // looping over row_ptr
-//        for (size_t j = (*row_ptr)[i]; j < (*row_ptr)[i+1]; j++)
-//            for (size_t k = j + 1; k <  (*row_ptr)[i+1]; k++)
-//                if ( (*col_idx)[j] > (*col_idx)[k] )
-//                {
-//                    int temp =  (*col_idx)[j];
-//                    (*col_idx)[j] = (*col_idx)[k];
-//                    (*col_idx)[k] = temp;
-//                }
+//    printf("\n");
+//
+//    for ( size_t i=0; i < (*N + 1); i++ )
+//        printf("%d", (*row_ptr)[i]);
+
+
+    // sorting col_idx array
+    for (size_t i = 0; i < *N; i++)  // looping over row_ptr
+        for (size_t j = (*row_ptr)[i]; j < (*row_ptr)[i+1]; j++)
+            for (size_t k = j + 1; k <  (*row_ptr)[i+1]; k++)
+                if ( (*col_idx)[j] > (*col_idx)[k] )
+                {
+                    int temp =  (*col_idx)[j];
+                    (*col_idx)[j] = (*col_idx)[k];
+                    (*col_idx)[k] = temp;
+                }
 }
 
 
@@ -144,14 +144,14 @@ int main(int argc, char *argv[])
 
     read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
 
-//    for (size_t i = 0; i < row_ptr[N + 1]; i++)
-//        printf("%d", col_idx[i]);
-//
-//    printf("\n");
-//
-//    for (size_t i = 0; i < N + 1; i++)
-//        printf("%d", row_ptr[i]);
-//
+    for (size_t i = 0; i < row_ptr[N + 1]; i++)
+        printf("%d", col_idx[i]);
+
+    printf("\n");
+
+    for (size_t i = 0; i < N + 1; i++)
+        printf("%d", row_ptr[i]);
+
     free(row_ptr);
     free(col_idx);
 
