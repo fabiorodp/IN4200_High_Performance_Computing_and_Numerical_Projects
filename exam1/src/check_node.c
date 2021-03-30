@@ -53,7 +53,6 @@ void check_node(int node_id, int tau, int N, int *row_ptr, int *col_idx,
     }
 
     // store nodes that are in the same cluster
-    // maximum possible are N minus 1 that is represented by the given node_id
     int *cluster = malloc(row_ptr[N] * sizeof *cluster);
 
     // global variables

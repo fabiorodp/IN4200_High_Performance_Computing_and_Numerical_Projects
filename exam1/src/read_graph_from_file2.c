@@ -74,9 +74,7 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
     char ln[128];
     unsigned int N_edges;
     while ( fgets(ln, sizeof ln, file) )
-    {
         if (sscanf(ln, "#%*s%d%*s%u\n", N, &N_edges)) break;  // efficiency
-    }
 
     // allocating arrays
     (*col_idx) = calloc( 2 * N_edges, sizeof **col_idx );
@@ -126,28 +124,3 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
                     (*col_idx)[k] = temp;
                 }
 }
-
-
-//int main(int argc, char *argv[])
-//{
-//    // declaration for the num. of nodes, CRS matrices and SNN_val
-//    int N, *col_idx, *row_ptr, *SNN_val;
-//
-//    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
-//
-//    printf("N = %d\n", N);
-//    printf("len = %d\n", row_ptr[N]);
-//
-//    for (size_t i = 0; i < row_ptr[N]; i++)
-//        printf("%d", col_idx[i]);
-//
-//    printf("\n");
-//
-//    for (size_t i = 0; i < N + 1; i++)
-//        printf("%d", row_ptr[i]);
-//
-//    free(row_ptr);
-//    free(col_idx);
-//
-//    return 0;
-//}
