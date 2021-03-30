@@ -83,7 +83,7 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr,
 
     // declaring variables
     size_t node;
-    unsigned int temp1, temp2, count = 0;
+    int temp1, temp2, count = 0;
 
     // assigning values to the arrays
     for ( node = 0; node < (*N)+1; node++ )  // to keep arrays' order
