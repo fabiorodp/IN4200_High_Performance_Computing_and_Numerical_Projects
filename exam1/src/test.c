@@ -40,6 +40,7 @@ SNN_val equals [ 2,2,2,  2,2,2,  2,2,3,1,  2,2,3,1,  1,1 ]
 void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
 {
     // allocating SNN_val that has the same length of col_idx
+    printf("%lu", sizeof **SNN_val);
     (*SNN_val) = (int *)calloc(row_ptr[N + 1], sizeof **SNN_val);
 
     // global variables
@@ -77,6 +78,9 @@ int main(int argc, char *argv[])
     int N, *col_idx, *row_ptr, *SNN_val;
 
     read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
+
+    for ( size_t i=0; i < row_ptr[N+1]; i++ )
+        printf("%d", col_idx[i]);
 
     create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
 
