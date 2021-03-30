@@ -54,14 +54,14 @@ void check_node(int node_id, int tau, int N, int *row_ptr, int *col_idx,
 
     // store nodes that are in the same cluster
     // maximum possible are N minus 1 that is represented by the given node_id
-    int *cluster = malloc(row_ptr[N+1] * sizeof *cluster);
+    int *cluster = malloc(row_ptr[N] * sizeof *cluster);
 
     // global variables
     size_t i, j, x;
 
     // assigning -1 for all elements in cluster array
     // to not have any value equals node_id in cluster array
-    for ( i = 0; i < row_ptr[N+1]; i++ ) cluster[i] = -1;
+    for ( i = 0; i < row_ptr[N]; i++ ) cluster[i] = -1;
 
     // finding the clustered nodes and storing in the cluster array
     int count = 0;
@@ -73,7 +73,7 @@ void check_node(int node_id, int tau, int N, int *row_ptr, int *col_idx,
                 int is_in = 0;
 
                 // checking if the node is already stored
-                for ( x = 0; x < row_ptr[N+1]; x++ )
+                for ( x = 0; x < row_ptr[N]; x++ )
                 {
                     if ( (cluster[x] == col_idx[j]) || (node_id == col_idx[j]) )
                         is_in = 1;

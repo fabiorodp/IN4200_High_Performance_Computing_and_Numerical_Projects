@@ -5,7 +5,7 @@
 #include <stdlib.h> // rand, malloc, calloc and free.
 #include <stdio.h>  // printf
 #include <omp.h>
-#include "read_graph_from_file2.c"
+//#include "read_graph_from_file2.c"
 
 
 void create_SNN_graph2_omp(int N, int *row_ptr, int *col_idx, int **SNN_val)
@@ -42,29 +42,29 @@ void create_SNN_graph2_omp(int N, int *row_ptr, int *col_idx, int **SNN_val)
     }
 }
 
-int main(int argc, char *argv[])
-{
-    // declaration for the num. of nodes, CRS matrices and SNN_val
-    int N, *col_idx, *row_ptr, *SNN_val;
-
-    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
-
-    for (size_t i = 0; i < row_ptr[N]; i++)
-        printf("%d", col_idx[i]);
-
-    printf("\n");
-
-    for (size_t i = 0; i < N + 1; i++)
-        printf("%d", row_ptr[i]);
-
-    printf("\n");
-
-    create_SNN_graph2_omp(N, row_ptr, col_idx, &SNN_val);
-
-    for (size_t i = 0; i < row_ptr[N]; i++)
-        printf("%d", SNN_val[i]);
-
-    free(SNN_val);
-    free(row_ptr);
-    free(col_idx);
-}
+//int main(int argc, char *argv[])
+//{
+//    // declaration for the num. of nodes, CRS matrices and SNN_val
+//    int N, *col_idx, *row_ptr, *SNN_val;
+//
+//    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
+//
+//    for (size_t i = 0; i < row_ptr[N]; i++)
+//        printf("%d", col_idx[i]);
+//
+//    printf("\n");
+//
+//    for (size_t i = 0; i < N + 1; i++)
+//        printf("%d", row_ptr[i]);
+//
+//    printf("\n");
+//
+//    create_SNN_graph2_omp(N, row_ptr, col_idx, &SNN_val);
+//
+//    for (size_t i = 0; i < row_ptr[N]; i++)
+//        printf("%d", SNN_val[i]);
+//
+//    free(SNN_val);
+//    free(row_ptr);
+//    free(col_idx);
+//}
