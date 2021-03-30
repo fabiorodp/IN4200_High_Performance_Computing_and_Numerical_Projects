@@ -94,7 +94,7 @@ void printing_CRS(int *col_idx, int *row_ptr, int N)
 
         // testing returned values for row_ptr
         printf("\nPrinting row_ptr...\n");
-        for ( size_t i = 0; i < N; i++)
+        for ( size_t i = 0; i < N+1; i++)
             printf("%d ", row_ptr[i]);
     }
 }
