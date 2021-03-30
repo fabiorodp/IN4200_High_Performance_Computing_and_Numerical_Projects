@@ -82,6 +82,39 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
     (*col_idx) = calloc( 2 * N_edges, sizeof **col_idx );
     (*row_ptr) = calloc( (*N + 1), sizeof **row_ptr );
 
+    // declaring variables
+    size_t node;
+    unsigned int temp1, temp2, count = 0;
+
+    // assigning values to the arrays
+    for ( node = 0; node < (*N)+1; node++ )  // to keep arrays' order
+    {
+        while ( fgets(ln, sizeof ln, file) )
+        {
+            if (ln[0] == '#') continue;  // efficiency
+
+            // not incur in memory storage traffic
+            sscanf(ln, "%u %u\n", &temp1, &temp2);
+
+            if ( temp1 == node )
+            {
+                (*col_idx)[count] = temp2;
+                count++;
+            }
+            else if ( temp2 == node )
+            {
+                (*col_idx)[count] = temp1;
+                count++;
+            }
+        }
+
+        // assigning the count
+        (*row_ptr)[node+1] = count;
+
+        // moving the cursor from the end to the beginning of the file
+        rewind(file);
+    }
+
     for ( size_t i=0; i < 2 * N_edges; i++ )
         printf("%d", (*col_idx)[i]);
 
@@ -90,38 +123,6 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
     for ( size_t i=0; i < (*N + 1); i++ )
         printf("%d", (*row_ptr)[i]);
 
-//    // declaring variables
-//    size_t node;
-//    unsigned int temp1, temp2, count = 0;
-//
-//    // assigning values to the arrays
-//    for ( node = 0; node < (*N)+1; node++ )  // to keep arrays' order
-//    {
-//        while ( fgets(ln, sizeof ln, file) )
-//        {
-//            if (ln[0] == '#') continue;  // efficiency
-//
-//            // not incur in memory storage traffic
-//            sscanf(ln, "%u %u\n", &temp1, &temp2);
-//
-//            if ( temp1 == node )
-//            {
-//                (*col_idx)[count] = temp2;
-//                count++;
-//            }
-//            else if ( temp2 == node )
-//            {
-//                (*col_idx)[count] = temp1;
-//                count++;
-//            }
-//        }
-//
-//        // assigning the count
-//        (*row_ptr)[node+1] = count;
-//
-//        // moving the cursor from the end to the beginning of the file
-//        rewind(file);
-//    }
 //
 //    // sorting col_idx array
 //    for (size_t i = 0; i < *N; i++)  // looping over row_ptr
