@@ -82,10 +82,10 @@ int main(int argc, char *argv[])
     for ( size_t i=0; i < row_ptr[N+1]; i++ )
         printf("%d", col_idx[i]);
 
-    create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
-
-    for ( size_t i=0; i < row_ptr[N+1]; i++ )
-        printf("%d", SNN_val[i]);
+//    create_SNN_graph2(N, row_ptr, col_idx, &SNN_val);
+//
+//    for ( size_t i=0; i < row_ptr[N+1]; i++ )
+//        printf("%d", SNN_val[i]);
 
     free(col_idx);
     free(row_ptr);
