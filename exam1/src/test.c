@@ -82,4 +82,8 @@ int main(int argc, char *argv[])
 
     for ( size_t i=0; i < row_ptr[N+1]; i++ )
         printf("%d", SNN_val[i]);
+
+    free(col_idx);
+    free(row_ptr);
+    free(SNN_val);
 }
