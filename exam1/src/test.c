@@ -7,69 +7,51 @@
 #include "read_graph_from_file2.c"
 
 
-/*
-Creating the corresponding Shared Nearest Neighbors SNN graph - version 2 -
-Compressed Row Storage:
-
-Inputs
-~~~~~~~~~~~~~~~~~~~~~~~~
-int N: Number of Nodes.
-int *row_ptr: 1D Array with the rows pointers.
-int *col_idx: 1D Array with the columns indices.
-
-Output
-~~~~~~~~~~~~~~~~~~~~~~~~
-int **SNN_val: 1D array containing the SNN's values, allocated inside the
-function, in a CRS format.
-
-Specifies:
-~~~~~~~~~~~~~~~~~~~~~~~~
-- An 2D array for SNN:
-    |-> unsigned int **SNN_val:
-        |-> (*SNN_val) = malloc(2*N_edges * sizeof SNN_val)
-
-Example:
-~~~~~~~~~~~~~~~~~~~~~~~~
-For example,
-an col_idx equals [ 1,2,3,    0,2,3,    0,1,3,4,    0,1,2,4,    2,3 ]
-and row_ptr equals [ 0,3,6,10,14,16 ]
-
-table2D_val equals [ 1,1,1,  1,1,1,  1,1,1,1,  1,1,1,1,  1,1 ]
-SNN_val equals [ 2,2,2,  2,2,2,  2,2,3,1,  2,2,3,1,  1,1 ]
-*/
-void create_SNN_graph2(int N, int *row_ptr, int *col_idx, int **SNN_val)
+void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
 {
-    // allocating SNN_val that has the same length of col_idx
-    printf("%lu", sizeof **SNN_val);
-    (*SNN_val) = (int *)calloc(row_ptr[N + 1], sizeof **SNN_val);
+    FILE *file;
 
-    // global variables
-    size_t z, x, i, j, row_nr;
-    int count;
+    // opening file
+    file = fopen(filename, "r");
 
-    // loop construct to assign values for (*SNN_val)
-    for ( z = 0; z < row_ptr[N + 1]; z++ )
-    {
-        count = 0;
+    fscanf(file, "%*[^\n]\n"); // skip one line
+    fscanf(file, "%*[^\n]\n"); // skip one line
 
-        for ( x = 0; x < N+1; x++ )  // getting row
-        {
-            if ( z < row_ptr[x] )
-            {
-                row_nr=x-1;
-                break;
+    fscanf(infile, "%*s %*s %d %*s %d \n", N, N_links);
+    int *to_arr = malloc(*N_links * sizeof(int));
+    int *from_arr = malloc(*N_links * sizeof(int));
+    *col_idx = malloc(*N_links * sizeof(int));
+    *row_ptr = malloc((*N + 1) * sizeof(int));
+    (*row_ptr)[0] = 0; // First row starts on index zero
+
+    fscanf(infile, "%*[^\n]\n"); // skip one line
+    c = 0;
+
+    // Reading the file and storing row_ptr values as
+    // Also saving to and from values for making col_idx
+    while (fscanf(infile, "%d %d\n", &from, &to) != EOF) {
+        if(from != to) {
+            (*row_ptr)[to + 1]++; // One more element linking to given web page
+            to_arr[c]     = to;
+            from_arr[c]   = from;
+            c++;
+        }
+    }
+
+    col_idx_index = 0;
+    for (int i=0; i<*N; i++) {
+        for (int j=0; j< *N_links; j++){
+            if (to_arr[j] == i) {
+                (*col_idx)[col_idx_index] = from_arr[j];
+                col_idx_index++;
             }
         }
-
-        for ( i = row_ptr[row_nr]; i < row_ptr[row_nr + 1]; i++ ) // in element/row
-        {
-            for ( j = row_ptr[col_idx[z]]; j < row_ptr[col_idx[z] + 1]; j++ )  // in element/col
-                if ( col_idx[i] == col_idx[j] )
-                    count += 1;
-        }
-
-        (*SNN_val)[z] = count;
     }
+    for (int i = 1; i < (*N+1); i++) {
+        (*row_ptr)[i] += (*row_ptr)[i-1];
+    }
+    free(to_arr);
+    free(from_arr);
 }
 
 int main(int argc, char *argv[])
