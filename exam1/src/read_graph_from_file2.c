@@ -144,6 +144,8 @@ int main(int argc, char *argv[])
 
     read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
 
+    printf("N = %d\n", N);
+
     for (size_t i = 0; i < row_ptr[N + 1]; i++)
         printf("%d", col_idx[i]);
 
