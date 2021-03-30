@@ -87,7 +87,7 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
     unsigned int temp1, temp2, count = 0;
 
     // assigning values to the arrays
-    for ( node = 0; node < (*N)+1; node++ )  // to keep arrays' order
+    for ( node = 0; node < (*N); node++ )  // to keep arrays' order
     {
         while ( fgets(ln, sizeof ln, file) )
         {
