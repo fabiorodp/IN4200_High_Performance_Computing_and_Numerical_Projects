@@ -146,15 +146,15 @@ void test_read_and_create_SNN_graph2(char *filename, int *N, int **col_idx,
 
     // Comparing if SNN_val and SNN_val_omp are equals
     printf("\nComparing if SNN_val and SNN_val_omp are equals:\n");
-    comparing_SNN_val((*SNN_val), SNN_val_omp, (*row_ptr)[*N+1]);
+    comparing_SNN_val((*SNN_val), SNN_val_omp, (*row_ptr)[*N]);
 
     // checking if the user want to print SNN_val
     printf("Please, type 'y' if you want to print SNN_val here:");
-    printing_SNN_val((*SNN_val), (*row_ptr)[*N+1]);
+    printing_SNN_val((*SNN_val), (*row_ptr)[*N]);
 
     // checking if the user want to print SNN_val_omp
     printf("\nPlease, type 'y' if you want to print SNN_val_omp here:");
-    printing_SNN_val(SNN_val_omp, (*row_ptr)[*N+1]);
+    printing_SNN_val(SNN_val_omp, (*row_ptr)[*N]);
 
     free(SNN_val_omp);
 }
