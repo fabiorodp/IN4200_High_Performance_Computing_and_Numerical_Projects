@@ -78,12 +78,13 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr,
         if (sscanf(ln, "#%*s%d%*s%u\n", N, &N_edges)) break;  // efficiency
     
     // allocating arrays
-    (*col_idx) = calloc( 2 * N_edges, sizeof **col_idx );
-    (*row_ptr) = calloc( (*N + 1), sizeof **row_ptr );
+    printf("\nooooo %lu %lu\n", sizeof(*col_idx), sizeof(*row_ptr));
+    (*col_idx) = calloc( 2 * N_edges, sizeof *col_idx );
+    (*row_ptr) = calloc( (*N + 1), sizeof *row_ptr );
 
     // declaring variables
     size_t node;
-    int temp1, temp2, count = 0;
+    unsigned int temp1, temp2, count = 0;
 
     // assigning values to the arrays
     for ( node = 0; node < (*N)+1; node++ )  // to keep arrays' order
