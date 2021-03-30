@@ -115,15 +115,6 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
         rewind(file);
     }
 
-//    for ( size_t i=0; i < 2 * N_edges; i++ )
-//        printf("%d", (*col_idx)[i]);
-//
-//    printf("\n");
-//
-//    for ( size_t i=0; i < (*N + 1); i++ )
-//        printf("%d", (*row_ptr)[i]);
-
-
     // sorting col_idx array
     for (size_t i = 0; i < *N; i++)  // looping over row_ptr
         for (size_t j = (*row_ptr)[i]; j < (*row_ptr)[i+1]; j++)
@@ -137,26 +128,26 @@ void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
 }
 
 
-int main(int argc, char *argv[])
-{
-    // declaration for the num. of nodes, CRS matrices and SNN_val
-    int N, *col_idx, *row_ptr, *SNN_val;
-
-    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
-
-    printf("N = %d\n", N);
-    printf("len = %d\n", row_ptr[N + 1]);
-
-    for (size_t i = 0; i < row_ptr[N + 1]; i++)
-        printf("%d", col_idx[i]);
-
-    printf("\n");
-
-    for (size_t i = 0; i < N + 1; i++)
-        printf("%d", row_ptr[i]);
-
-    free(row_ptr);
-    free(col_idx);
-
-    return 0;
-}
+//int main(int argc, char *argv[])
+//{
+//    // declaration for the num. of nodes, CRS matrices and SNN_val
+//    int N, *col_idx, *row_ptr, *SNN_val;
+//
+//    read_graph_from_file2(argv[1], &N, &row_ptr, &col_idx);
+//
+//    printf("N = %d\n", N);
+//    printf("len = %d\n", row_ptr[N]);
+//
+//    for (size_t i = 0; i < row_ptr[N]; i++)
+//        printf("%d", col_idx[i]);
+//
+//    printf("\n");
+//
+//    for (size_t i = 0; i < N + 1; i++)
+//        printf("%d", row_ptr[i]);
+//
+//    free(row_ptr);
+//    free(col_idx);
+//
+//    return 0;
+//}
