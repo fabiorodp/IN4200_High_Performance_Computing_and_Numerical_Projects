@@ -57,8 +57,7 @@ data/graph_example.txt:
 col_idx: 1,2,3, 0,2,3, 0,1,3,4, 0,1,2,4, 2,3
 row_ptr: 0,3,6,10,14,16
 */
-void read_graph_from_file2(char *filename, int *N, int **row_ptr,
-                           int **col_idx)
+void read_graph_from_file2(char *filename, int *N, int **row_ptr, int **col_idx)
 {
     FILE *file;
 
@@ -144,5 +143,6 @@ int main(int argc, char *argv[])
 
     free(row_ptr);
     free(col_idx);
+
     return 0;
 }
