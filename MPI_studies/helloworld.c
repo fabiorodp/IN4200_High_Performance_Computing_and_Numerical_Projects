@@ -3,7 +3,7 @@
 
 // compiling & running
 // mpicc -o hello helloWorld.c
-// mpirun -np 2 ./hello
+// mpirun -np 1 ./hello
 
 
 #include <stdlib.h> // rand, malloc, calloc, realloc and free.
