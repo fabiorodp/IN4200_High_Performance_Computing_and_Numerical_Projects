@@ -3,7 +3,7 @@
 
 
 /*
-Double convolutional kernels are applied to an input 2D array in 
+A convolutional kernel is applied to an input 2D array in 
 a serialized fashion.
 
 Arguments:
@@ -11,17 +11,31 @@ Arguments:
 int M: The number of rows for the input 2D array.
 int N: The number of columns for the input 2D array.
 float **input: The input 2D array.
-int K1: The dimensions K1xK1 for the first input kernel 2D array.
-float **kernel1: The first input kernel 2D array.
-int K2: The dimensions K2xK2 for the second input kernel 2D array.
-float **kernel2: The second input kernel 2D array.
+int K: The dimensions KxK for the input kernel 2D array.
+float **kernel: The input kernel 2D array.
 float **output: The output 2D array.
 */
-void double_layer_convolution(int M, int N, float **input, 
-                              int K1, float **kernel1, int K2, 
-                              float **kernel2, float **output)
+void single_layer_convolution(int M, int N, float *input, int K, 
+                              float *kernel, float **output)
 {
-
+    int i, j, ii, jj;
+    double temp;
+    (*output) = malloc( (M-K+1) * (N-K+1) * sizeof **output );
+    for ( i=0; i<=(M-K); i++ )
+        for ( j=0; j<=(N-K); j++ )
+            {
+                printf("i=%d and j=%d\n", i, j);
+                temp=0.0;
+                for (ii=0; ii<K; ii++)
+                    for (jj=0; jj<K; jj++)
+                    {
+                        printf("ii=%d and jj=%d >> ", ii, jj);
+                        printf("%f * %f\n", input[ (i+ii)*N + (j+jj) ], kernel[ ii*K + jj ]);
+                        temp += input[ (i+ii)*N + (j+jj) ] * kernel[ (ii*K + jj) ];
+                    }
+                printf("output[%d]=%f\n", i*(N-K+1) + j, temp);
+                (*output)[ i*(N-K+1) + j ] = temp;
+            }
 }
 
 
@@ -71,7 +85,4 @@ root, to collect the computed results from all the processes.
 */
 void MPI_double_layer_convolution(int M, int N, float **input, 
                                   int K1, float **kernel1, int K2, 
-                                  float **kernel2, float **output)
-{
-
-}
+                                  float **kernel2, float **output);
