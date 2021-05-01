@@ -32,33 +32,43 @@ void print2Darray(int row_len, int col_len)
 /*
 Arguments:
 ~~~~~~~~~~~~~~~~~~~~~
+M for # of rows
+N for # of columns
+
 */
 int main(int argc, char *argv[]) 
 {
-    int M=0, N=0, K1=0, K2=0, my_rank, size;
+    int M=0, N=0, K1=0, K2=0, rank, size;
     float *input=NULL, *output=NULL, *kernel1=NULL, *kernel2=NULL;
     
     MPI_Init(&argc, &argv);  // Initiating MPI
-    MPI_Comm_size(MPI_COMM_WORLD, &size);  // # of processors.
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);  // currently rank.
+    MPI_Comm_size(MPI_COMM_WORLD, &size);  // # of processes.
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);  // currently rank.
 
-    if ( my_rank == 0 )
+    if ( rank == 0 )
     {
     // read from command line the values of M, N, K1 and K2;
     M = atoi(argv[1]); N = atoi(argv[2]); 
     K1 = atoi(argv[3]); K2 = atoi(argv[4]);
 
+    if (size > N) 
+    {
+        printf("Error: N has to be larger than the amount of MPI processes!");
+        MPI_Finalize();
+        return 1;
+    }
+
     // allocate 2D array 'input' with M rows and N columns;
-    float *input = malloc( M * N * sizeof *input );
+    *input = malloc( M * N * sizeof *input );
 
     // allocate 2D array 'output' with M-K1-K2+2 rows and N-K1-K2+2 columns;
-    float *output = malloc( (M-K1-K2+2) * (N-K1-K2+2) * sizeof *output );
+    *output = malloc( (M-K1-K2+2) * (N-K1-K2+2) * sizeof *output );
     
     // allocate the convolutional kernel1 with K1 rows and K1 columns;
-    float *kernel1 = malloc( K1 * K1 * sizeof *input );
+    *kernel1 = malloc( K1 * K1 * sizeof *input );
 
     // allocate the convolutional kernel2 with K2 rows and K2 columns;
-    float *kernel2 = malloc( K2 * K2 * sizeof *input );
+    *kernel2 = malloc( K2 * K2 * sizeof *input );
 
     // fill 2D array 'input' with some values;
     for ( int i = 0; i < M; i++ )
@@ -92,12 +102,12 @@ int main(int argc, char *argv[])
     MPI_Bcast(&K1, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&K2, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    if ( my_rank > 0 )
+    if ( myRank > 0 )
     {
         // allocate the convolutional kernel1 with K1 rows and K1 columns
-        float *kernel1 = malloc( K1 * K1 * sizeof *input );
+        *kernel1 = malloc( K1 * K1 * sizeof *input );
         // allocate the convolutional kernel2 with K2 rows and K2 columns
-        float *kernel2 = malloc( K2 * K2 * sizeof *input );
+        *kernel2 = malloc( K2 * K2 * sizeof *input );
     }
 
     // process 0 broadcasts the content of kernels to all the other processes
@@ -107,7 +117,7 @@ int main(int argc, char *argv[])
     // parallel computation of a multi-layer convolution
     MPI_double_layer_convolution(M, N, input, K1, kernel1, K2, kernel2, output);
 
-    if ( my_rank == 0 )
+    if ( rank == 0 )
     {
         // for example, compare the content of array 'output' with that is
         // produced by the sequential function double_layer_convolution
