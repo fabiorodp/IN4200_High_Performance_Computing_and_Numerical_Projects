@@ -26,7 +26,7 @@ N for # of columns
 int main(int argc, char *argv[]) 
 {
     int M=0, N=0, K1=0, K2=0, rank, size;
-    float *input=NULL, *output=NULL, *kernel1=NULL, *kernel2=NULL;
+    float **input=NULL, **output=NULL, **kernel1=NULL, **kernel2=NULL;
     
     MPI_Init(&argc, &argv);  // Initiating MPI
     MPI_Comm_size(MPI_COMM_WORLD, &size);  // # of processes.
@@ -46,16 +46,16 @@ int main(int argc, char *argv[])
         }
 
         // allocate 2D array 'input' with M rows and N columns;
-        *input = *(float *)malloc( M * N * sizeof *input );
+        // input = malloc( M * N * sizeof *input );
 
         // allocate 2D array 'output' with M-K1-K2+2 rows and N-K1-K2+2 columns;
-        *output = *(float *)malloc( (M-K1-K2+2) * (N-K1-K2+2) * sizeof *output );
+        output = malloc( (M-K1-K2+2) * (N-K1-K2+2) * sizeof *output );
         
         // allocate the convolutional kernel1 with K1 rows and K1 columns;
-        *kernel1 = *(float *)malloc( K1 * K1 * sizeof *input );
+        kernel1 = malloc( K1 * K1 * sizeof *input );
 
         // allocate the convolutional kernel2 with K2 rows and K2 columns;
-        *kernel2 = *(float *)malloc( K2 * K2 * sizeof *input );
+        kernel2 = malloc( K2 * K2 * sizeof *input );
 
         // fill 2D array 'input' with some values;
         int count = 0;
@@ -87,9 +87,9 @@ int main(int argc, char *argv[])
     if ( rank > 0 )
     {
         // allocate the convolutional kernel1 with K1 rows and K1 columns
-        *kernel1 = *(float *)malloc( K1 * K1 * sizeof *input );
+        kernel1 = malloc( K1 * K1 * sizeof *input );
         // allocate the convolutional kernel2 with K2 rows and K2 columns
-        *kernel2 = *(float *)malloc( K2 * K2 * sizeof *input );
+        kernel2 = malloc( K2 * K2 * sizeof *input );
     }
 
     // process 0 broadcasts the content of kernels to all the other processes

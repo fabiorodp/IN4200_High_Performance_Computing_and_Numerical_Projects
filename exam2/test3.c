@@ -18,8 +18,8 @@ int main( int argc, char **argv )
 {
     int M=6, N=5, K1=3, K2=2;
     int matrix[30] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
-                     16, 17,18,19,20,21,22,23,24,25,26,27,
-                     28,29,30};
+                      16, 17,18,19,20,21,22,23,24,25,26,27,
+                      28,29,30};
     
     // allocating arrays
     int *num_elements = malloc(NUM_OF_RANKS * sizeof *num_elements);  // # of elem. transfered
