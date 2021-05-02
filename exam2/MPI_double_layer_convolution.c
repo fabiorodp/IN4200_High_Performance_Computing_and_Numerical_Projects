@@ -95,6 +95,15 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     MPI_Comm_size(MPI_COMM_WORLD, &NUM_OF_RANKS);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
+    // if ( myRank == 0 ) 
+    //     printf("\nM=%d, N=%d, input[29]=%f, K1=%d, kernel1[1]=%f, K2=%d, kernel2[1]=%f\n", M,N,input[29], K1, kernel1[1], K2, kernel2[1]);
+
+    // if ( myRank == 1 ) 
+    // {
+    //     printf("\nM=%d, N=%d, K1=%d, K2=%d\n", M,N,K1,K2);
+    //     for ( int a=0; a < K1*K1; a++) printf("%f ", kernel1[a]);
+    // }
+
     // calculate displacements and number of rows for each process.
     int participants, remain;
     if ( NUM_OF_RANKS > maxNeededRanks ) participants = maxNeededRanks;
