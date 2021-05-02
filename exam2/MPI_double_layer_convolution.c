@@ -88,74 +88,140 @@ void MPI_double_layer_convolution(int M, int N, float *input,
                                   float *kernel2, float *output)
 {
     // calculate max needed processes
-    int maxNeededProcesses = (M-K1-K2+2) * (N-K1-K2+2)
+    int maxNeededRanks = (M-K1-K2+2) * (N-K1-K2+2);
 
     // getting number of processes and current rank
-    int numProcesses, myRank;
-    MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
+    int NUM_OF_RANKS, myRank;
+    MPI_Comm_size(MPI_COMM_WORLD, &NUM_OF_RANKS);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     // calculate displacements and number of rows for each process.
     int participants, remain;
-    if ( numProcesses > maxNeededProcesses ) participants = maxNeededProcesses;
-    else participants = numProcesses;
+    if ( NUM_OF_RANKS > maxNeededRanks ) participants = maxNeededRanks;
+    else participants = NUM_OF_RANKS;
 
-    int *n_cols = malloc( participants * sizeof *n_cols );
-    int *displs = malloc( participants * sizeof *displs );
+    // allocating arrays
+    int *num_elements = malloc(participants * sizeof *num_elements);  // # of elem. transfered
+    int *displs = malloc(participants * sizeof *displs);              // idx of the first
 
-    if ( (M * N) % participants == 0 ) remainder = 0
-    if ( (M * N) % participants != 0 ) remainder = (M * N) % participants;
+    // output row and col sizes
+    int M_out = M - (K1-1) - (K2-1);  // 6-(3-1)-(2-1) = 3
+    int N_out = N - (K1-1) - (K2-1);  // 5-(3-1)-(2-1) = 2
+    int lenElem = (K1+K2-2)*(N+1)+1;  // (3+2-2)*(5+1)+1 = 19
 
-    int cols = N/size;
-    int remainder = N%size;
-
-    // Last remainder processes gets an extra row.
-    displs[0] = 0;
-    for ( int rank = 0; rank < size-1; rank++ ) {
-        n_cols[rank] = cols + ((rank >= (size - remainder)) ? 1:0);
-        displs[rank+1] = displs[rank] + n_cols[rank];
+    if ( participants == maxNeededRanks )
+    {
+        // calculate displacement and number of elements for each rank
+        // participants=6 >> 6 blocks with 1 element
+        // returning displs[participants=6] = {0,1,5,6,10,11}
+        // returning num_elements[participants=6] = {19, 19, 19, 19, 19, 19}
+        int count = 0;
+        for ( int i = 0; i < M_out; i++ )
+            for ( int j = 0; j < N_out; j++ )
+            {
+                displs[count] = i*N+j;
+                num_elements[count] = (K1+K2-2)*(N+1)+1;
+                count++;
+            }
     }
-    n_cols[size-1] = cols + ((size-1) >= (size - remainder) ? 1:0);
+    else
+    {
+        // calculate displacement and number of elements for each rank
+        // Example: participants=4 >> 2 blocks with 1 element and 2 with 2 elements
+        // returning displs[participants=4] = {0,1,5,10}
+        // returning num_elements[participants=4] = {19, 19, 20, 20}
+        int numEntries = maxNeededRanks/participants;               // 6/4 = 1
+        int numBlocks_remainder = maxNeededRanks%participants;      // 6%4 = 2
+        int numBlocks = participants - numBlocks_remainder;         // 4-2 = 2
+        int displs_maxRank[maxNeededRanks];                         // [0,1,5,6,10,11]
 
-    double *myA = malloc( N*n_cols[myrank] * sizeof *myA );
-    double *my_x = malloc( n_cols[myrank] * sizeof *my_x );
+        // calculate displacement and number of elements for all possible ranks (maxRanks)
+        int count = 0;
+        for ( int i = 0; i < M_out; i++ )
+            for ( int j = 0; j < N_out; j++ )
+            {
+                displs_maxRank[count] = i*N+j;
+                count++;
+            }
+        
+        for ( int entry = 0; entry < (numBlocks+numBlocks_remainder); entry++ )
+        {
+            if ( entry < numBlocks )  // 0, 1
+            {
+                displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
+                num_elements[entry] = displs_maxRank[numEntries-1]+lenElem;
+            }
+            else if ( entry == numBlocks )
+            {
+                displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
+                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+lenElem;
+            }
+            else  // 2, 3
+            {
+                displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries+1] );
+                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+lenElem;
+            }
+        }
+    }
+
+    double *myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
     
-    // Define types.
-    MPI_Datatype col_temp, col_vec, recv_temp, recv_col;
+    // // Define types.
+    // MPI_Datatype col_temp, col_vec, recv_temp, recv_col;
 
-    // This is the type used to send the data.
-    MPI_Type_vector(N, 1, N, MPI_DOUBLE, &col_temp);
-    // This line is necesarry, but a bit confusing. See the README.
-    MPI_Type_create_resized(col_temp, 0, sizeof(double), &col_vec);
-    MPI_Type_commit(&col_vec);
+    // // This is the type used to send the data.
+    // MPI_Type_vector(N, 1, N, MPI_DOUBLE, &col_temp);
 
-    // This type is used to recive. Only difference is the stride.
-    MPI_Type_vector(N, 1, n_cols[myrank], MPI_DOUBLE, &recv_temp);
-    MPI_Type_create_resized(recv_temp, 0, sizeof(double), &recv_col);
-    MPI_Type_commit(&recv_col);
+    // // This line is necesarry, but a bit confusing. See the README.
+    // MPI_Type_create_resized(col_temp, 0, sizeof(double), &col_vec);
+    // MPI_Type_commit(&col_vec);
+
+    // // This type is used to recive. Only difference is the stride.
+    // MPI_Type_vector(N, 1, n_cols[myrank], MPI_DOUBLE, &recv_temp);
+    // MPI_Type_create_resized(recv_temp, 0, sizeof(double), &recv_col);
+    // MPI_Type_commit(&recv_col);
 
     // Scatter A and x.
-    MPI_Scatterv(A,                 // sendbuf, matters only for root process.
-                 n_cols,
-                 displs,
-                 col_vec,           // The new type used to send.
-                 myA,
-                 n_cols[myrank],
-                 recv_col,          // New type used to receive.
-                 0,
-                 MPI_COMM_WORLD);
+    MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
+                                                                            by the root process.
+                                        */
+                 num_elements,          // int *sendcounts [in]:            The number of elements to send to each process.
+                 displs,                /* int *displs [in]:                The locations of the data to send to each communicator 
+                                                                            process. Each location in the array is relative to the 
+                                                                            corresponding element of the sendbuf array. In the sendbuf, 
+                                                                            sendcounts, and displs parameter arrays, the nth element of 
+                                                                            each array refers to the data to be sent to the nth 
+                                                                            communicator process.
+                                        */
+                 MPI_FLOAT,             // MPI_Datatype sendtype [in]:      The MPI data type of each element in the buffer.
+                 myInput,               /* void *recvbuf [out]:             The pointer to a buffer that contains the data that is 
+                                                                            received on each process.
+                                        */
+                 num_elements[myRank],  /* int recvcount [out]:             The number of elements in the receive buffer. If the 
+                                                                            count is zero, the data part of the message is empty. 
+                                        */
+                 MPI_FLOAT,             // MPI_Datatype recvtype [out]:     The data type of the elements in the receive buffer.
+                 0,                     /* int root:                        The rank in the sending process within the specified 
+                                                                            communicator.
+                                        */
+                 MPI_COMM_WORLD         // MPI_Comm comm:                   The MPI_Comm communicator handle.
+    );
 
-    MPI_Scatterv(x,
-                 n_cols,
-                 displs,
-                 MPI_DOUBLE,
-                 my_x,
-                 n_cols[myrank],
-                 MPI_DOUBLE,
-                 0,
-                 MPI_COMM_WORLD);
+    // convolution operations
+    for ( int x = 0; x < num_elements[myRank]; x++ )
+        printf("rank=%d and input_elements=%f\n", myRank, myInput[x]);
+
+    // // getter
+    // if (myrank==0) {
+    //     output = malloc(N * sizeof *output);
+    // }
+    // MPI_Reduce(my_y, // Send buffer.
+    //            y, // Receive buffer.
+    //            N,
+    //            MPI_DOUBLE,
+    //            MPI_SUM,
+    //            0, // Root, the result ends up here.
+    //            MPI_COMM_WORLD
+    // );
 }
-
-araay[1][2]
-array[1*N+2]
