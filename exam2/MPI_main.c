@@ -3,7 +3,7 @@
 
 // compiling & running
 // mpicc -o MPI_main MPI_main.c
-// mpirun -np 2 ./MPI_main
+// mpirun -np 2 ./MPI_main 6 5 3 2
 
 
 #include <stdlib.h> // rand, malloc, calloc, realloc and free.

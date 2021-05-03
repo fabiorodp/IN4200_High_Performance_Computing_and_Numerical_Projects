@@ -173,11 +173,11 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         }
     }
 
-    double *myInput = malloc( num_elements[myRank] * sizeof *myInput );
+    float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
     
-    // // Define types.
-    // MPI_Datatype col_temp, col_vec, recv_temp, recv_col;
+    // Define types.
+    MPI_Datatype col_temp, col_vec, recv_temp, recv_col;
 
     // // This is the type used to send the data.
     // MPI_Type_vector(N, 1, N, MPI_DOUBLE, &col_temp);
