@@ -175,21 +175,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
 
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
-    
-    // Define types.
-    MPI_Datatype col_temp, col_vec, recv_temp, recv_col;
-
-    // // This is the type used to send the data.
-    // MPI_Type_vector(N, 1, N, MPI_DOUBLE, &col_temp);
-
-    // // This line is necesarry, but a bit confusing. See the README.
-    // MPI_Type_create_resized(col_temp, 0, sizeof(double), &col_vec);
-    // MPI_Type_commit(&col_vec);
-
-    // // This type is used to recive. Only difference is the stride.
-    // MPI_Type_vector(N, 1, n_cols[myrank], MPI_DOUBLE, &recv_temp);
-    // MPI_Type_create_resized(recv_temp, 0, sizeof(double), &recv_col);
-    // MPI_Type_commit(&recv_col);
 
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
@@ -217,9 +202,24 @@ void MPI_double_layer_convolution(int M, int N, float *input,
                  MPI_COMM_WORLD         // MPI_Comm comm:                   The MPI_Comm communicator handle.
     );
 
-    // convolution operations
+    // verboose
     for ( int x = 0; x < num_elements[myRank]; x++ )
         printf("rank=%d and input_elements=%f\n", myRank, myInput[x]);
+
+    // 1,2,3,4,5
+    // 6,7,8,9,10
+    // 11,12,13,14,15
+    // 16,17,18,19,20
+    // 21,22,23,24,__
+
+    // convolution operations inside ranks
+    float *myOutput1, *myOutput2;
+    int M_rank = num_elements[myRank]/N+N-(num_elements[myRank]%N);
+    printf("rank=%d, M_rank=%d, N=%d, num_elements[myRank]=%d\n", myRank, M_rank, N, num_elements[myRank]);
+    single_layer_convolution(M_rank, N, myInput, K1, kernel1, &myOutput1);
+    for (printf("%f", myOutput1[0]);
+    // single_layer_convolution(M-K1+1, N-K1+1, myOutput1, K2, kernel2, &myOutput2);
+    // printf("%f", myOutput2[0]);
 
     // // getter
     // if (myrank==0) {
