@@ -168,7 +168,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         free(input);
 
         printf("\n\n");
-        for ( s = 0; s < len; s++ ) 
+        for ( int s = 0; s < len; s++ ) 
             printf("resizedInput[s=%d]=%f ", s, resizedInput[s]);
         
         // computations of the first convolution:
