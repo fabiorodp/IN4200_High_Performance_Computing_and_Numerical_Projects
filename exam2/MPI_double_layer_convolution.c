@@ -232,8 +232,8 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         (*lenOutput) = 0;
         for ( s = 0; s < lenOut2; s++ )  // 0, 1
         {
-            if ( s >= lenOut2-(N - (lenInput%N)) ) break;
-            (*output)[s] = out2[s];
+            if ( s >= lenOut2-(N - (lenInput%N)) ) break;  // error in >> lenOut2-(N - (lenInput%N)) = 1
+            (*output) = out2[s];
             (*lenOutput)++;
         }
 
