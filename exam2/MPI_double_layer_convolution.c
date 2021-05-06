@@ -236,6 +236,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         free(out2);
+        printf("\n out2 freed\n");
     }
 }
 
