@@ -108,7 +108,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         printf("\n\n");
-        for ( int s = 0; s < lenOut1; s++ )
+        for ( s = 0; s < lenOut1; s++ )
             printf("out1[s=%d]=%f ", s, out1[s]);
 
         // computations of the second convolution:
