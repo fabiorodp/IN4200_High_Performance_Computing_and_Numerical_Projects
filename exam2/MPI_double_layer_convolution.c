@@ -406,7 +406,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     float *myOutput;
     int lenMyOutput;
 
-    if ( myRank == 1 )
+    if ( myRank == 0 )
     {
         double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
         
