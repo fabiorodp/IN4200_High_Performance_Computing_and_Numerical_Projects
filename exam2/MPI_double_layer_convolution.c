@@ -194,7 +194,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         free(resizedInput);
 
         printf("\n\n");
-        for ( s = 0; s < lenOut1; s++ )
+        for ( int s = 0; s < lenOut1; s++ )
             printf("out1[s=%d]=%f ", s, out1[s]);
 
         // computations of the second convolution:
@@ -221,7 +221,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         free(out1);
 
         printf("\n\n");
-        for ( s = 0; s < lenOut2; s++ )
+        for ( int s = 0; s < lenOut2; s++ )
             printf("out2[s=%d]=%f ", s, out2[s]);
         
         // truncating output[out] to have only the needed values 
@@ -230,7 +230,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
 
         printf("\n truncating output...\n");
         (*lenOutput) = 0;
-        for ( s = 0; s < lenOut2; s++ )
+        for ( int s = 0; s < lenOut2; s++ )
         {
             if ( (*lenOutput) == lenOut2-(N - (lenInput%N)) ) break;
             (*output)[s] = out2[s];
