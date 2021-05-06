@@ -229,13 +229,17 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
 
         printf("\n truncating %d %lu output...\n", lenOut2-(N - (lenInput%N)), sizeof **output);
-        (*lenOutput) = 0;
-        for ( s = 0; s < lenOut2; s++ )  // 0, 1
-        {
-            if ( s >= lenOut2-(N - (lenInput%N)) ) break;  // error in >> lenOut2-(N - (lenInput%N)) = 1
-            (*output)[s] = out2[s];
-            (*lenOutput)++;
-        }
+        // (*lenOutput) = 0;
+        // for ( s = 0; s < lenOut2; s++ )  // 0, 1
+        // {
+        //     if ( s >= lenOut2-(N - (lenInput%N)) ) break;  // error here
+        //     (*output)[s] = out2[s];
+        //     (*lenOutput)++;
+        // }
+
+        out2 = realloc(out2, lenOut2-(N - (lenInput%N)) * sizeof *out2);
+        (*output) = out2;
+        (*lenOutput) = lenOut2-(N - (lenInput%N));
 
         printf("\n freeing out2...\n");
         free(out2);
