@@ -198,8 +198,7 @@ broadcasted in its entirety from process 0 to the other porcesses.)
 function MPI_Gatherv is suggested to be called, with process 0 being the 
 root, to collect the computed results from all the processes.
 */
-void MPI_double_layer_convolution(int M, int N, float *input, 
-                                  int K1, float *kernel1, int K2, 
+void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *kernel1, int K2, 
                                   float *kernel2, float **output)
 {
     // getting number of processes and current rank
@@ -282,15 +281,15 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     }
     
     myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    for ( int u = 0; u < NUM_OF_RANKS; u++ ) printf("num_elements[%d]=%d, displs[%d]=%d\n", u, num_elements[u], u, displs[u]);
+    // for ( int u = 0; u < NUM_OF_RANKS; u++ ) printf("num_elements[%d]=%d, displs[%d]=%d\n", u, num_elements[u], u, displs[u]);
     MPI_Barrier(MPI_COMM_WORLD);
     
     // Scatter A and x.
-    MPI_Scatterv(myRank == 0 ? input : NULL,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
+    MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
                                                                             by the root process.
                                         */
-                 myRank == 0 ? num_elements : NULL,          // int *sendcounts [in]:            The number of elements to send to each process.
-                 myRank == 0 ? displs : NULL,                /* int *displs [in]:                The locations of the data to send to each communicator 
+                 num_elements,          // int *sendcounts [in]:            The number of elements to send to each process.
+                 displs,                /* int *displs [in]:                The locations of the data to send to each communicator 
                                                                             process. Each location in the array is relative to the 
                                                                             corresponding element of the sendbuf array. In the sendbuf, 
                                                                             sendcounts, and displs parameter arrays, the nth element of 
@@ -310,10 +309,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
                                         */
                  MPI_COMM_WORLD         // MPI_Comm comm:                   The MPI_Comm communicator handle.
     );
-
-    printf("error");
-    printf("error");
-    printf("error");
 
     // computing the convolutions
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
@@ -335,7 +330,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         myOutput,               // void *sendbuf[in]: The handle to a buffer that contains the data to be sent to the root process.
         lenMyOutput,            // int sendcount[in]: The number of elements in the send buffer.
         MPI_FLOAT,              // MPI_Datatype sendtype: The data type of each element in the buffer.
-        (*output),              // void *recvbuf[out]: The handle to a buffer on the root process that contains the data that is received from each process, including data that is sent by the root process.
+        *output,                // void *recvbuf[out]: The handle to a buffer on the root process that contains the data that is received from each process, including data that is sent by the root process.
         recvcounts,             // int *recvcounts[][in]: The number of elements that is received from each process.
         recvDispls,             // int *displs[][in]:
         MPI_FLOAT,              // MPI_Datatype recvtype:
