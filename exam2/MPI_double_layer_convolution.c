@@ -297,6 +297,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
 
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
     // MPI_Barrier(MPI_COMM_WORLD);
+    printf("Error here");
 
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
@@ -329,7 +330,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int lenMyOutput;
 
     // computing the convolutions
-    printf("Error here");
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
 
     int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
