@@ -61,13 +61,18 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
     // resizing input array to be able to make the calculations
     if ( (lenInput%N != 0) && (myRank != 0) )
     {
-        len = lenInput + (N - (lenInput%N));
-        resizedInput = malloc(len * sizeof *resizedInput);
-
+        int q = lenInput/N;
+        int r = lenInput%N;
+        
+        len = lenInput + (N - r);
+        resizedInput = calloc(len, sizeof *resizedInput);
+        
+        printf("Error here");
+        // resizing to the correct shape of the matrix
         for ( i=0; i < len; i++ )
         {
-            if ( i < N - (lenInput%N) ) resizedInput[i] = 0;
-            else resizedInput[i] = input[i- (N - (lenInput%N))];
+            if ( i < N - r ) resizedInput[i] = 0;
+            else resizedInput[i] = input[i - (N - r)];
         }
 
         // freeing unnecessary array input
@@ -345,7 +350,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int sum = 0;
     for ( int x = 0; x < NUM_OF_RANKS; x++ )
     {
-        if ( x < NUM_OF_RANKS-(lenOutput%NUM_OF_RANKS) ) recvcounts[x] = div;
+        if ( x < NUM_OF_RANKS-rem ) recvcounts[x] = div;
         else recvcounts[x] = div+1;
 
         sum += x == 0 ? 0 : recvcounts[x-1];
