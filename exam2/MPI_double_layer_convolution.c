@@ -44,7 +44,8 @@ Double convolutional kernels are applied to an input array.
 void double_layer_convolution(int M, int N, float *input, int K1, int K2, float *kernel1,
                               float *kernel2, int lenInput, int myRank, float **output, int *lenOutput)
 {
-    int s, i, j, ii, jj, len, M1_rank, M2_rank, N2_rank, M_out, N_out, lenOut1, lenOut2;
+    size_t s, i, j, ii, jj;
+    int len, M1_rank, M2_rank, N2_rank, lenOut1, lenOut2;
     float *resizedInput, *out1, *out2;
     double temp;
 
@@ -54,9 +55,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
 
     M2_rank = (M1_rank-K1+1);
     N2_rank = (N-K1+1);
-    M_out = M1_rank-K1-K2+2;
-    N_out = N-K1-K2+2;
-    lenOut2 = M_out * N_out;
+    lenOut2 = (M1_rank-K1-K2+2) * (N-K1-K2+2);
     out2 = malloc( lenOut2 * sizeof *out1 );
 
     // resizing input array to be able to make the calculations
@@ -152,6 +151,9 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         // computations of the second convolution:
         single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
 
+        // freeing unnecessary out1
+        free(out1);
+
         // assingning values in output[out] array
         (*lenOutput) = 0;
         for ( s = 0; s < lenOut2; s++ )
@@ -221,15 +223,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     MPI_Comm_size(MPI_COMM_WORLD, &NUM_OF_RANKS);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    // if ( myRank == 0 ) 
-    //     printf("\nM=%d, N=%d, input[29]=%f, K1=%d, kernel1[1]=%f, K2=%d, kernel2[1]=%f\n", M,N,input[29], K1, kernel1[1], K2, kernel2[1]);
-
-    // if ( myRank == 1 ) 
-    // {
-    //     printf("\nM=%d, N=%d, K1=%d, K2=%d\n", M,N,K1,K2);
-    //     for ( int a=0; a < K1*K1; a++) printf("%f ", kernel1[a]);
-    // }
-
     // calculate displacements and number of rows for each process.
     int participants, remain;
     if ( NUM_OF_RANKS > maxNeededRanks ) participants = maxNeededRanks;
@@ -240,9 +233,9 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int *displs = malloc(participants * sizeof *displs);              // idx of the first
 
     // output row and col sizes
-    int M_out = M - (K1-1) - (K2-1);  // 6-(3-1)-(2-1) = 3
-    int N_out = N - (K1-1) - (K2-1);  // 5-(3-1)-(2-1) = 2
-    int lenElem = (K1+K2-2)*(N+1)+1;  // (3+2-2)*(5+1)+1 = 19
+    int M_out = M - (K1-1) - (K2-1);
+    int N_out = N - (K1-1) - (K2-1);
+    int lenElem = (K1+K2-2)*(N+1)+1;
 
     if ( participants == maxNeededRanks )
     {
@@ -332,19 +325,8 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     float *myOutput;
     int lenMyOutput;
 
+    // computing the convolutions
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
-
-    // if ( myRank == 0 )
-    // {
-    //     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
-        
-    //     printf("\n\n");
-    //     for (int i=0; i<lenMyOutput; i++)
-    //     {
-    //         printf("output[i=%d]=%f", i, myOutput[i]);
-    //         printf("\nlenMyOutput=%d\n", lenMyOutput);
-    //     }
-    // }
 
     int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
     int div = lenOutput/NUM_OF_RANKS;
@@ -369,8 +351,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         // printf("\nrecvcounts[x=%d]=%d and recvDispls[x=%d]=%d", x, recvcounts[x], x, recvDispls[x] );
     }
 
-    // MPI_Barrier(MPI_COMM_WORLD);
-
     MPI_Gatherv(
         myOutput,               // void *sendbuf[in]: The handle to a buffer that contains the data to be sent to the root process.
         lenMyOutput,            // int sendcount[in]: The number of elements in the send buffer.
@@ -382,4 +362,9 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         0,                      // int root:
         MPI_COMM_WORLD          // MPI_Comm comm:
     );
+
+    free(num_elements);
+    free(displs);
+    free(recvcounts);
+    free(recvDispls);
 }
