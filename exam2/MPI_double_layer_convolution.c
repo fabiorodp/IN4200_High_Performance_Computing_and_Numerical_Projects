@@ -254,6 +254,9 @@ void MPI_double_layer_convolution(int M, int N, float *input,
                 num_elements[count] = (K1+K2-2)*(N+1)+1;
                 count++;
             }
+        printf("ERROR\n");
+        printf("ERROR\n");
+        printf("ERROR\n");
     }
     else
     {
