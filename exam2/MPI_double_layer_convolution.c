@@ -305,8 +305,10 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     // printf("ERROR\n");
     // printf("ERROR\n");
     MPI_Barrier(MPI_COMM_WORLD);
-    
 
+    int ui = 10;
+    printf("%d", ui);
+    
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
                                                                             by the root process.
