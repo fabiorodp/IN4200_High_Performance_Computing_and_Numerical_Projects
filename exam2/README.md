@@ -44,7 +44,7 @@ Output after double convolution:
 
 ```
 exam2 % mpicc -o MPI_main MPI_main.c
-exam2 % mpirun -np 2 ./MPI_main
+exam2 % mpirun -np 2 ./MPI_main 6 5 3 2
 
 sequential_output[0]=105.000000 and parallel_output[0]=105.000000
 sequential_output[1]=115.000000 and parallel_output[1]=115.000000
