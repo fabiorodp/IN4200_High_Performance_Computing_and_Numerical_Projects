@@ -107,6 +107,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         {
             if ( i >= lenInput ) resizedInput[i] = 0;
             else resizedInput[i] = input[i];
+            printf("%d", resizedInput[i]);
         }
 
         // freeing unnecessary input
@@ -258,10 +259,10 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         // Example: participants=4 >> 2 blocks with 1 element and 2 with 2 elements
         // returning displs[participants=4] = {0,1,5,10}
         // returning num_elements[participants=4] = {19, 19, 20, 20}
-        int numEntries = maxNeededRanks/participants;               // 6/4 = 1
-        int numBlocks_remainder = maxNeededRanks%participants;      // 6%4 = 2
-        int numBlocks = participants - numBlocks_remainder;         // 4-2 = 2
-        int displs_maxRank[maxNeededRanks];                         // [0,1,5,6,10,11]
+        int numEntries = maxNeededRanks/participants;
+        int numBlocks_remainder = maxNeededRanks%participants;
+        int numBlocks = participants - numBlocks_remainder;
+        int displs_maxRank[maxNeededRanks];
 
         // calculate displacement and number of elements for all possible ranks (maxRanks)
         int count = 0;
@@ -348,7 +349,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
 
         sum += x == 0 ? 0 : recvcounts[x-1];
         recvDispls[x] = x == 0 ? 0 : sum;
-        // printf("\nrecvcounts[x=%d]=%d and recvDispls[x=%d]=%d", x, recvcounts[x], x, recvDispls[x] );
     }
 
     MPI_Gatherv(
