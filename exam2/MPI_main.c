@@ -101,7 +101,10 @@ int main(int argc, char *argv[])
         // computing if both techniques return equal values
         int is_equal;
         for ( u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ )
+        {
             is_equal = seq_output2[u]==output[u] ? 1 : 0;
+            printf("seq_output2[%lu]=%d and output[%lu]=%d", u, seq_output2[u], u, output[u]);
+        }
         
         if ( is_equal==1 ) printf("The serialized and MPI paralelized outputs are equal.\n");
         else printf("The serialized and MPI paralelized outputs are NOT equal.\n");
