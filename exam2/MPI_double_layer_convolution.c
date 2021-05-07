@@ -283,6 +283,8 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
     }
     
     printf("num_elements[myRank=%d]=%d", myRank, num_elements[myRank]);
+    printf("EROROROROROR");
+    printf("EROROROROROR");
     myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
     
