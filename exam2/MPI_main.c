@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
 
     if ( rank == 0 )
     {
-        // for ( int u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ ) printf("\noutput[u=%d]=%f", u, output[u]);
         // for example, compare the content of array 'output' with that is
         // produced by the sequential function double_layer_convolution
         float *seq_output1, *seq_output2;
@@ -102,12 +101,10 @@ int main(int argc, char *argv[])
         // computing if both techniques return equal values
         int is_equal;
         for ( u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ )
-        {
             is_equal = seq_output2[u]==output[u] ? 1 : 0;
-        }
         
-        if ( is_equal==1 ) printf("The serialized and MPI paralelized outputs are equal.");
-        else printf("The serialized and MPI paralelized outputs are NOT equal.");
+        if ( is_equal==1 ) printf("The serialized and MPI paralelized outputs are equal.\n");
+        else printf("The serialized and MPI paralelized outputs are NOT equal.\n");
         
         free(seq_output2);
     }
