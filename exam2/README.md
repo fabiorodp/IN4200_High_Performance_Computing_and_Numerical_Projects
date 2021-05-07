@@ -18,6 +18,7 @@ ____
 
 
 ## Example of a main test:
+```
 For Matrix:
 1  2  3  4  5
 6  7  8  9  10
@@ -39,6 +40,7 @@ Output after double convolution:
 105 115
 155 165
 205 215
+```
 
 ```
 exam2 % mpicc -o MPI_main MPI_main.c
