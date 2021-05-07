@@ -230,8 +230,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int rem = lenOutput%NUM_OF_RANKS;
 
     // allocating arrays
-    int *num_elements = malloc(NUM_OF_RANKS * sizeof *num_elements);  // # of elem. transfered
-    int *displs = malloc(NUM_OF_RANKS * sizeof *displs);              // idx of the first
+    int num_elements[NUM_OF_RANKS], displs[NUM_OF_RANKS];
 
     // output row and col sizes
     int M_out = M - K1 - K2 + 2;
@@ -245,26 +244,25 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         // participants=6 >> 6 blocks with 1 element
         // returning displs[participants=6] = {0,1,5,6,10,11}
         // returning num_elements[participants=6] = {19, 19, 19, 19, 19, 19}
+        int count = 0;
+        for ( int i = 0; i < M_out; i++ )
+            for ( int j = 0; j < N_out; j++ )
+            {
+                displs[count] = i*N+j;
+                num_elements[count] = minNumElem;
+                count++;
+            }
         
-        // int count = 0;
-        // for ( int i = 0; i < M_out; i++ )
-        //     for ( int j = 0; j < N_out; j++ )
-        //     {
-        //         displs[count] = i*N+j;
-        //         num_elements[count] = minNumElem;
-        //         count++;
-        //     }
-        
-        int sum = 0;
-        for ( int u = 0; u < NUM_OF_RANKS; u++ )
-        {
-            num_elements[u] = minNumElem;
+        // int sum = 0;
+        // for ( int u = 0; u < NUM_OF_RANKS; u++ )
+        // {
+        //     num_elements[u] = minNumElem;
             
-            sum += u == 0 ? 0 : num_elements[u-1];
-            displs[u] = u == 0 ? 0 : sum;
+        //     sum += u == 0 ? 0 : num_elements[u-1];
+        //     displs[u] = u == 0 ? 0 : sum;
 
-            // printf("\nnumElem=%d", num_elements[u]);
-        }
+        //     // printf("\nnumElem=%d", num_elements[u]);
+        // }
     }
 
     else
@@ -276,7 +274,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         int numEntries = lenOutput/NUM_OF_RANKS;
         int numBlocks_remainder = lenOutput%NUM_OF_RANKS;
         int numBlocks = NUM_OF_RANKS - numBlocks_remainder;
-        int *displs_maxRank = malloc(lenOutput * sizeof *displs_maxRank);
+        int displs_maxRank[lenOutput];
 
         // calculate displacement and number of elements for all possible ranks (maxRanks)
         int count = 0;
@@ -308,8 +306,8 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     }
     
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    for ( int t = 0; t < NUM_OF_RANKS; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
-    // MPI_Barrier(MPI_COMM_WORLD);
+    // for ( int t = 0; t < NUM_OF_RANKS; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
+    MPI_Barrier(MPI_COMM_WORLD);
     
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
@@ -345,12 +343,12 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
 
     // computing the number of elements that is received from each process.
-    int *recvcounts = malloc( NUM_OF_RANKS * sizeof *recvcounts );
+    int recvcounts[NUM_OF_RANKS];
 
     // The location, relative to the recvbuf parameter, of the data from each communicator process. 
     // The data that is received from process j is placed into the receive buffer of the root process 
     // offset displs[x] elements from the sendbuf pointer.
-    int *recvDispls = malloc( NUM_OF_RANKS * sizeof *displs );
+    int recvDispls[NUM_OF_RANKS];
 
     int sum = 0;
     for ( int x = 0; x < NUM_OF_RANKS; x++ )
@@ -373,9 +371,4 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         0,                      // int root:
         MPI_COMM_WORLD          // MPI_Comm comm:
     );
-
-    // free(num_elements);
-    // free(displs);
-    // free(recvcounts);
-    // free(recvDispls);
 }
