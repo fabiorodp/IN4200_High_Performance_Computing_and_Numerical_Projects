@@ -224,19 +224,14 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     // global variables
-    int maxNeededRanks = (M-K1-K2+2) * (N-K1-K2+2);
     int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
 
-    int participants;
-    if ( NUM_OF_RANKS > maxNeededRanks ) participants = maxNeededRanks;
-    else participants = NUM_OF_RANKS;
-
-    int div = lenOutput/participants;
-    int rem = lenOutput%participants;
+    int div = lenOutput/NUM_OF_RANKS;
+    int rem = lenOutput%NUM_OF_RANKS;
 
     // allocating arrays
-    int *num_elements = malloc(participants * sizeof *num_elements);  // # of elem. transfered
-    int *displs = malloc(participants * sizeof *displs);              // idx of the first
+    int *num_elements = malloc(NUM_OF_RANKS * sizeof *num_elements);  // # of elem. transfered
+    int *displs = malloc(NUM_OF_RANKS * sizeof *displs);              // idx of the first
 
     // output row and col sizes
     int M_out = M - K1 - K2 + 2;
@@ -244,7 +239,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int minNumElem = (K1+K2-2)*(N+1)+1;
 
     // calculate displacements and number of rows for each process.
-    if ( participants == maxNeededRanks )
+    if ( NUM_OF_RANKS == lenOutput )
     {
         // calculate displacement and number of elements for each rank
         // participants=6 >> 6 blocks with 1 element
@@ -261,7 +256,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         //     }
         
         int sum = 0;
-        for ( int u = 0; u < participants; u++ )
+        for ( int u = 0; u < NUM_OF_RANKS; u++ )
         {
             num_elements[u] = minNumElem;
             
@@ -275,13 +270,13 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     else
     {
         // calculate displacement and number of elements for each rank
-        // Example: participants=4 >> 2 blocks with 1 element and 2 with 2 elements
-        // returning displs[participants=4] = {0,1,5,10}
-        // returning num_elements[participants=4] = {19, 19, 20, 20}
-        int numEntries = maxNeededRanks/participants;
-        int numBlocks_remainder = maxNeededRanks%participants;
-        int numBlocks = participants - numBlocks_remainder;
-        int displs_maxRank[maxNeededRanks];
+        // Example: NUM_OF_RANKS=4 >> 2 blocks with 1 element and 2 with 2 elements
+        // returning displs[NUM_OF_RANKS=4] = {0,1,5,10}
+        // returning num_elements[NUM_OF_RANKS=4] = {19, 19, 20, 20}
+        int numEntries = lenOutput/NUM_OF_RANKS;
+        int numBlocks_remainder = lenOutput%NUM_OF_RANKS;
+        int numBlocks = NUM_OF_RANKS - numBlocks_remainder;
+        int *displs_maxRank = malloc(lenOutput * sizeof *displs_maxRank);
 
         // calculate displacement and number of elements for all possible ranks (maxRanks)
         int count = 0;
@@ -302,26 +297,20 @@ void MPI_double_layer_convolution(int M, int N, float *input,
             else if ( entry == numBlocks )
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
-                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+minNumElem;
+                num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem;
             }
             else
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries+1] );
-                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+minNumElem;
+                num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem;
             }
         }
     }
     
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    for ( int t = 0; t < participants; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
+    for ( int t = 0; t < NUM_OF_RANKS; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
 
     MPI_Barrier(MPI_COMM_WORLD);
-
-    int ui = 10;
-    printf("%d", ui);
-
-    printf("ERROR\n");
-    printf("ERROR\n");
     
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
@@ -357,17 +346,17 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
 
     // computing the number of elements that is received from each process.
-    int *recvcounts = malloc( participants * sizeof *recvcounts );
+    int *recvcounts = malloc( NUM_OF_RANKS * sizeof *recvcounts );
 
     // The location, relative to the recvbuf parameter, of the data from each communicator process. 
     // The data that is received from process j is placed into the receive buffer of the root process 
     // offset displs[x] elements from the sendbuf pointer.
-    int *recvDispls = malloc( participants * sizeof *displs );
+    int *recvDispls = malloc( NUM_OF_RANKS * sizeof *displs );
 
     int sum = 0;
-    for ( int x = 0; x < participants; x++ )
+    for ( int x = 0; x < NUM_OF_RANKS; x++ )
     {
-        if ( x < participants-rem ) recvcounts[x] = div;
+        if ( x < NUM_OF_RANKS-rem ) recvcounts[x] = div;
         else recvcounts[x] = div+1;
 
         sum += x == 0 ? 0 : recvcounts[x-1];
