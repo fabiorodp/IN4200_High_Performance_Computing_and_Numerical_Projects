@@ -99,14 +99,14 @@ int main(int argc, char *argv[])
         free(seq_output1);
         
         // computing if both techniques return equal values
-        int is_equal;
+        int is_equal=0;
         for ( u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ )
         {
-            is_equal = seq_output2[u]==output[u] ? 1 : 0;
-            printf("seq_output2[%lu]=%f and output[%lu]=%f\n", u, seq_output2[u], u, output[u]);
+            is_equal += seq_output2[u]==output[u] ? 0 : 1;
+            printf("sequential_output[%lu]=%f and parallel_output[%lu]=%f\n", u, seq_output2[u], u, output[u]);
         }
         
-        if ( is_equal==1 ) printf("The serialized and MPI paralelized outputs are equal.\n");
+        if ( is_equal==0 ) printf("The serialized and MPI paralelized outputs are equal.\n");
         else printf("The serialized and MPI paralelized outputs are NOT equal.\n");
         
         free(seq_output2);
