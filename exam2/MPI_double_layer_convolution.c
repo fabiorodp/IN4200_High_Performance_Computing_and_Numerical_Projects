@@ -104,11 +104,12 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         
         len = lenInput + (N - r);
         resizedInput = calloc(len, sizeof *resizedInput);
-
+        
+        printf("Error here");
         // resizing to the correct shape of the matrix
         for ( i = 0; i < len; i++ ) resizedInput[i] = input[i];
 
-        // printf("Error here");
+        printf("Error here1");
 
         // freeing unnecessary input
         free(input);
