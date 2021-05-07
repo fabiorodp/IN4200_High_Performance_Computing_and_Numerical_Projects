@@ -294,7 +294,7 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
         free(displs_maxRank);
     }
     
-    printf("num_elements[myRank]", myRank, num_elements[myRank]);
+    printf("num_elements[%d]=%d", myRank, num_elements[myRank]);
     myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
     
@@ -353,9 +353,10 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
         0,                      // int root:
         MPI_COMM_WORLD          // MPI_Comm comm:
     );
-    free(num_elements);
-    free(displs);
-    free(recvcounts);
-    free(recvDispls);
-    free(myInput);
+
+    // free(num_elements);
+    // free(displs);
+    // free(recvcounts);
+    // free(recvDispls);
+    // free(myInput);
 }
