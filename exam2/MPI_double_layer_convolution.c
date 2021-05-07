@@ -109,6 +109,8 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
             else resizedInput[i] = input[i];
             printf("%f\n", resizedInput[i]);
         }
+        
+        printf("Error here");
 
         // freeing unnecessary input
         free(input);
@@ -124,8 +126,6 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
 
         // freeing unnecessary out1
         free(out1);
-
-        printf("Error here");
         
         // truncating output[out] to have only the needed values 
         (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
