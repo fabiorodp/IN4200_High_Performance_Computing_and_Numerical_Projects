@@ -63,7 +63,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
     {
         int q = lenInput/N;
         int r = lenInput%N;
-        printf("Error here");
+
         len = lenInput + (N - r);
         resizedInput = calloc(len, sizeof *resizedInput);
         
@@ -329,6 +329,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int lenMyOutput;
 
     // computing the convolutions
+    printf("Error here");
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
 
     int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
