@@ -257,7 +257,6 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
             for ( j = 0; j < N_out; j++ )
             {
                 displs_maxRank[count] = (int)i*N+j;
-                printf("\nrank=%d, displs_maxRank[%d]=%d and value=%d", myRank, count, displs_maxRank[count], i*N+j);
                 count++;
             }
         
@@ -267,34 +266,23 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
                 num_elements[entry] = displs_maxRank[numEntries-1]+minNumElem;
-                
-                printf("\ndispls[%d]=%d", entry, displs[entry]);
-                printf("\nnum_elements[%d]=%d", entry, num_elements[entry]);
-                printf("\nnum_elements[%d]=%d", entry, displs_maxRank[numEntries-1]+minNumElem);
             }
             else if ( entry == numBlocks )
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
                 num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem;
-                
-                printf("\ndispls[%d]=%d", entry, displs[entry]);
-                printf("\nnum_elements[%d]=%d", entry, num_elements[entry]);
-                printf("\nnum_elements[%d]=%d", entry, displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem);
             }
             else
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries+1] );
                 num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem;
-                printf("\ndispls[%d]=%d", entry, displs[entry]);
-                printf("\nnum_elements[%d]=%d", entry, num_elements[entry]);
-                printf("\nnum_elements[%d]=%d", entry, displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem);
             }
         }
         
         // free(displs_maxRank);
     }
     
-    printf("num_elements[%d]=%d", myRank, num_elements[myRank]);
+    printf("num_elements[myRank=%d]=%d", myRank, num_elements[myRank]);
     myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
     
@@ -338,8 +326,6 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
 
         sum += u == 0 ? 0 : recvcounts[u-1];
         recvDispls[u] = u == 0 ? 0 : sum;
-
-        printf("\nrecvcounts=%d and recvDispls=%d", recvcounts[u], recvDispls[u]);
     }
 
     MPI_Gatherv(
