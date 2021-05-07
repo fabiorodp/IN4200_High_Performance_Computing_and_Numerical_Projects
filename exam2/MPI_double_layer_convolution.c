@@ -282,7 +282,7 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
         // free(displs_maxRank);
     }
     
-    for ( i = 0; i < NUM_OF_RANKS; i++ ) printf("num_elements[myRank=%d]=%d", i, num_elements[i]);
+    for ( i = 0; i < NUM_OF_RANKS; i++ ) printf("\nnum_elements[myRank=%d]=%d", i, num_elements[i]);
     myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
     
