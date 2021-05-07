@@ -80,30 +80,30 @@ int main(int argc, char *argv[])
     // parallel computation of a multi-layer convolution
     MPI_double_layer_convolution(M, N, input, K1, kernel1, K2, kernel2, &output);
 
-    // if ( rank == 0 )
-    // {
-    //     // for example, compare the content of array 'output' with that is
-    //     // produced by the sequential function double_layer_convolution
-    //     float *seq_output1, *seq_output2;
-    //     single_layer_convolution(M, N, input, K1, kernel1, &seq_output1);
-    //     single_layer_convolution(M-K1+1, N-K1+1, seq_output1, K2, kernel2, &seq_output2);
+    if ( rank == 0 )
+    {
+        // for example, compare the content of array 'output' with that is
+        // produced by the sequential function double_layer_convolution
+        float *seq_output1, *seq_output2;
+        single_layer_convolution(M, N, input, K1, kernel1, &seq_output1);
+        single_layer_convolution(M-K1+1, N-K1+1, seq_output1, K2, kernel2, &seq_output2);
         
-    //     // freeing unnecessary array
-    //     free(seq_output1);
+        // freeing unnecessary array
+        free(seq_output1);
         
-    //     // computing if both techniques return equal values
-    //     int is_equal=0;
-    //     for ( u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ )
-    //     {
-    //         is_equal += seq_output2[u]==output[u] ? 0 : 1;
-    //         printf("sequential_output[%lu]=%f and parallel_output[%lu]=%f\n", u, seq_output2[u], u, output[u]);
-    //     }
+        // computing if both techniques return equal values
+        int is_equal=0;
+        for ( u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ )
+        {
+            is_equal += seq_output2[u]==output[u] ? 0 : 1;
+            printf("sequential_output[%lu]=%f and parallel_output[%lu]=%f\n", u, seq_output2[u], u, output[u]);
+        }
         
-    //     if ( is_equal==0 ) printf("The serialized and MPI paralelized outputs are equal.\n");
-    //     else printf("The serialized and MPI paralelized outputs are NOT equal.\n");
+        if ( is_equal==0 ) printf("The serialized and MPI paralelized outputs are equal.\n");
+        else printf("The serialized and MPI paralelized outputs are NOT equal.\n");
         
-    //     free(seq_output2);
-    // }
+        free(seq_output2);
+    }
     MPI_Finalize();
     return 0;
 }
