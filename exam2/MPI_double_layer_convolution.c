@@ -99,19 +99,16 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
 
     else if ( (lenInput%N != 0) && (myRank == 0) )
     {
-        // resizing to the correct shape of the matrix
-        len = lenInput + (N - (lenInput%N));
-        printf("len=%d", len);
-        resizedInput = malloc(len * sizeof *resizedInput);
-
-        for ( i=0; i < len; i++ )
-        {
-            if ( i >= lenInput ) resizedInput[i] = 0;
-            else resizedInput[i] = input[i];
-            printf("%f\n", resizedInput[i]);
-        }
+        int q = lenInput/N;
+        int r = lenInput%N;
         
-        printf("Error here");
+        len = lenInput + (N - r);
+        resizedInput = calloc(len, sizeof *resizedInput);
+
+        // resizing to the correct shape of the matrix
+        for ( i = 0; i < len; i++ ) resizedInput[i] = input[i];
+
+        // printf("Error here");
 
         // freeing unnecessary input
         free(input);
