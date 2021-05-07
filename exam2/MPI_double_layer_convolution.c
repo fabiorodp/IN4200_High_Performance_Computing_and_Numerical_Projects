@@ -308,7 +308,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     }
     
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    // for ( int t = 0; t < NUM_OF_RANKS; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
+    for ( int t = 0; t < NUM_OF_RANKS; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
     // MPI_Barrier(MPI_COMM_WORLD);
     
     // Scatter A and x.
