@@ -240,6 +240,11 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int N_out = N - (K1-1) - (K2-1);
     int lenElem = (K1+K2-2)*(N+1)+1;
 
+    printf("Error here\n");
+    printf("Error here\n");
+    printf("Error here\n");
+    printf("Error here\n");
+
     if ( participants == maxNeededRanks )
     {
         // calculate displacement and number of elements for each rank
@@ -297,7 +302,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
 
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
     // MPI_Barrier(MPI_COMM_WORLD);
-    printf("Error here");
+    
 
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
