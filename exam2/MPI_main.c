@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
         if (size > N) 
         {
-            printf("Error: N has to be larger than the amount of MPI processes!");
+            printf("Error: N has to be larger than the amount of MPI processes.\n");
             MPI_Finalize();
             return 1;
         }
