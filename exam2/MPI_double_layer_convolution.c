@@ -3,49 +3,44 @@
 
 
 /*
-A convolutional kernel is applied to an input 2D array in 
-a serialized fashion.
+A convolutional kernel is applied to an input array in a serialized fashion.
 
 Arguments:
 ~~~~~~~~~~~~~~~~~~~~~
-int M: The number of rows for the input 2D array.
-int N: The number of columns for the input 2D array.
-float **input: The input 2D array.
-int K: The dimensions KxK for the input kernel 2D array.
-float **kernel: The input kernel 2D array.
-float **output: The output 2D array.
+int M: The number of rows.
+int N: The number of columns.
+float *input: The input array in 1D fashion.
+int K: The dimensions KxK for the input kernel in 1D array fashion.
+float *kernel: The input kernel in 1D array fashion.
+float **output: The output array in 1D array fashion.
 */
-void single_layer_convolution(int M, int N, float *input, int K, 
-                              float *kernel, float **output)
+void single_layer_convolution(int M, int N, float *input, int K, float *kernel, float **output)
 {
-    int i, j, ii, jj;
+    size_t i, j, ii, jj, x;
     double temp;
     
+    // allocating the output array in 1D fashion
     (*output) = malloc( (M-K+1) * (N-K+1) * sizeof **output );
     
     for ( i=0; i<=(M-K); i++ )
-    {
         for ( j=0; j<=(N-K); j++ )
             {
-                printf("i=%d and j=%d\n", i, j);
                 temp=0.0;
-                for (ii=0; ii<K; ii++)
-                    for (jj=0; jj<K; jj++)
-                    {
-                        printf("ii=%d and jj=%d >> ", ii, jj);
-                        printf("%f * %f\n", input[ (i+ii)*N + (j+jj) ], kernel[ ii*K + jj ]);
-                        temp += input[ (i+ii)*N + (j+jj) ] * kernel[ (ii*K + jj) ];
-                    }
-                printf("output[%d]=%f\n", i*(N-K+1) + j, temp);
-                (*output)[ i*(N-K+1) + j ] = temp;
-            }
-    }
+                
+                // fusion of nested loopings >> to increase performance
+                for( x = 0; x < K*K; x++ )
+                {
+                    ii = x/K; jj = x%K;
+                    temp += input[ (i+ii)*N + (j+jj) ] * kernel[ (ii*K + jj) ];
+                }
 
-    // for( size_t x = 0; x < N*N; n++ )  // fusion of nested loopings
-    //     size_t i = x/N; size_t j = x%N;
+                (*output)[ i*(N-K+1) + j ] = temp;
+            }     
 }
 
-
+/*
+Double convolutional kernels are applied to an input array.
+*/
 void double_layer_convolution(int M, int N, float *input, int K1, int K2, float *kernel1,
                               float *kernel2, int lenInput, int myRank, float **output, int *lenOutput)
 {
@@ -56,8 +51,6 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
     M1_rank = (lenInput%N)!=0 ? lenInput / N + (N - (lenInput%N)) : lenInput / N;
     lenOut1 = (M1_rank-K1+1) * (N-K1+1);
     out1 = malloc( lenOut1 * sizeof *out1 );
-    printf("\nlenOut1=%d\n", lenOut1 );
-    printf("\nM1_rank=%d\n", M1_rank );
 
     M2_rank = (M1_rank-K1+1);
     N2_rank = (N-K1+1);
@@ -65,10 +58,6 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
     N_out = N-K1-K2+2;
     lenOut2 = M_out * N_out;
     out2 = malloc( lenOut2 * sizeof *out1 );
-    printf("\nlenOut2=%d\n", lenOut2 );
-    printf("\nM_out=%d\n", M_out );
-    printf("\nN_out=%d\n", N_out );
-    printf("\nM2_rank=%d\n", M2_rank );
 
     // resizing input array to be able to make the calculations
     if ( (lenInput%N != 0) && (myRank != 0) )
@@ -82,63 +71,19 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
             else resizedInput[i] = input[i- (N - (lenInput%N))];
         }
 
+        // freeing unnecessary array input
         free(input);
-
-        printf("\n\n");
-        for ( s = 0; s < len; s++ ) 
-            printf("resizedInput[s=%d]=%f ", s, resizedInput[s]);
         
         // computations of the first convolution:
-        for ( i=0; i<=(M1_rank-K1); i++ )
-        {
-            for ( j=0; j<=(N-K1); j++ )
-                {
-                    printf("i=%d and j=%d\n", i, j);
-                    temp=0.0;
-                    for (ii=0; ii<K1; ii++)
-                        for (jj=0; jj<K1; jj++)
-                        {
-                            printf("ii=%d and jj=%d >> ", ii, jj);
-                            printf("%f * %f\n", resizedInput[ (i+ii)*N + (j+jj) ], kernel1[ ii*K1 + jj ]);
-                            temp += resizedInput[ (i+ii)*N + (j+jj) ] * kernel1[ (ii*K1 + jj) ];
-                        }
-                    printf("out1[%d]=%f\n", i*(N-K1+1) + j, temp);
-                    out1[ i*(N-K1+1) + j ] = temp;
-                }
-        }
-
-        printf("\n\n");
-        for ( s = 0; s < lenOut1; s++ )
-            printf("out1[s=%d]=%f ", s, out1[s]);
+        single_layer_convolution(M1_rank, N, resizedInput, K1, kernel1, &out1);
 
         // computations of the second convolution:
-        for ( i=0; i<=M2_rank-K2; i++ )
-        {
-            for ( j=0; j<=N2_rank-K2; j++ )
-                {
-                    printf("i=%d and j=%d\n", i, j);
-                    temp=0.0;
-                    for (ii=0; ii<K2; ii++)
-                        for (jj=0; jj<K2; jj++)
-                        {
-                            printf("ii=%d and jj=%d >> ", ii, jj);
-                            printf("%f * %f\n", out1[ (i+ii)*N2_rank + (j+jj) ], kernel2[ ii*K2 + jj ]);
-                            temp += out1[ (i+ii)*N2_rank + (j+jj) ] * kernel2[ (ii*K2 + jj) ];
-                        }
-                    printf("out2[%d]=%f\n", i*(N2_rank-K2+1) + j, temp);
-                    out2[ i*(N2_rank-K2+1) + j ] = temp;
-                }
-        }
-
-        // freeing unnecessary out2
-        free(out1);
-
-        printf("\n\n");
-        for ( s = 0; s < lenOut2; s++ )
-            printf("out2[s=%d]=%f ", s, out2[s]);
+        single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
         
-        // truncating output[out] to have only the needed values 
-        // freeing unnecessary out2
+        // freeing unnecessary out1
+        free(out1);
+        
+        // truncating output[out] to have only the needed element values
         (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
 
         (*lenOutput) = 0;
@@ -149,14 +94,15 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
             (*lenOutput)++;
         }
 
+        // freeing unnecessary out2
         free(out2);
     }
 
     else if ( (lenInput%N != 0) && (myRank == 0) )
     {
         // resizing to the correct shape of the matrix
-        len = lenInput + (N - (lenInput%N));                        // correct length
-        resizedInput = malloc(len * sizeof *resizedInput);          // correct allocated matrix in 1D fashion
+        len = lenInput + (N - (lenInput%N));
+        resizedInput = malloc(len * sizeof *resizedInput);
 
         for ( i=0; i < len; i++ )
         {
@@ -166,82 +112,55 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
 
         // freeing unnecessary input
         free(input);
-
-        printf("\n\n");
-        for ( s = 0; s < len; s++ ) 
-            printf("resizedInput[s=%d]=%f ", s, resizedInput[s]);
         
         // computations of the first convolution:
-        for ( i=0; i<=(M1_rank-K1); i++ )
-        {
-            for ( j=0; j<=(N-K1); j++ )
-                {
-                    printf("i=%d and j=%d\n", i, j);
-                    temp=0.0;
-                    for (ii=0; ii<K1; ii++)
-                        for (jj=0; jj<K1; jj++)
-                        {
-                            printf("ii=%d and jj=%d >> ", ii, jj);
-                            printf("%f * %f\n", resizedInput[ (i+ii)*N + (j+jj) ], kernel1[ ii*K1 + jj ]);
-                            temp += resizedInput[ (i+ii)*N + (j+jj) ] * kernel1[ (ii*K1 + jj) ];
-                        }
-                    printf("out1[%d]=%f\n", i*(N-K1+1) + j, temp);
-                    out1[ i*(N-K1+1) + j ] = temp;
-                }
-        }
+        single_layer_convolution(M1_rank, N, resizedInput, K1, kernel1, &out1);
 
         // freeing unnecessary resizedInput
         free(resizedInput);
 
-        printf("\n\n");
-        for ( s = 0; s < lenOut1; s++ )
-            printf("out1[s=%d]=%f ", s, out1[s]);
-
         // computations of the second convolution:
-        for ( i=0; i<=M2_rank-K2; i++ )
+        single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
+
+        // freeing unnecessary out1
+        free(out1);
+        
+        // truncating output[out] to have only the needed values 
+        (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
+
+        // assingning values in output[out] array
+        (*lenOutput) = 0;
+        for ( s = 0; s < lenOut2; s++ )
         {
-            for ( j=0; j<=N2_rank-K2; j++ )
-                {
-                    printf("i=%d and j=%d\n", i, j);
-                    temp=0.0;
-                    for (ii=0; ii<K2; ii++)
-                        for (jj=0; jj<K2; jj++)
-                        {
-                            printf("ii=%d and jj=%d >> ", ii, jj);
-                            printf("%f * %f\n", out1[ (i+ii)*N2_rank + (j+jj) ], kernel2[ ii*K2 + jj ]);
-                            temp += out1[ (i+ii)*N2_rank + (j+jj) ] * kernel2[ (ii*K2 + jj) ];
-                        }
-                    printf("out2[%d]=%f\n", i*(N2_rank-K2+1) + j, temp);
-                    out2[ i*(N2_rank-K2+1) + j ] = temp;
-                }
+            if ( s >= lenOut2-(N - (lenInput%N)) ) break;  // error here
+            (*output)[s] = out2[s];
+            (*lenOutput)++;
         }
 
         // freeing unnecessary out2
-        printf("\n freeing out1...\n");
-        free(out1);
+        free(out2);
+    }
 
-        printf("\n\n");
+    else
+    {
+        // computations of the first convolution:
+        single_layer_convolution(M1_rank, N, input, K1, kernel1, &out1);
+
+        // freeing unnecessary resizedInput
+        free(input);
+
+        // computations of the second convolution:
+        single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
+
+        // assingning values in output[out] array
+        (*lenOutput) = 0;
         for ( s = 0; s < lenOut2; s++ )
-            printf("out2[s=%d]=%f ", s, out2[s]);
+        {
+            (*output)[s] = out2[s];
+            (*lenOutput)++;
+        }
         
-        // truncating output[out] to have only the needed values 
         // freeing unnecessary out2
-        (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
-
-        printf("\n truncating %d %lu output...\n", lenOut2-(N - (lenInput%N)), sizeof **output);
-        // (*lenOutput) = 0;
-        // for ( s = 0; s < lenOut2; s++ )  // 0, 1
-        // {
-        //     if ( s >= lenOut2-(N - (lenInput%N)) ) break;  // error here
-        //     (*output)[s] = out2[s];
-        //     (*lenOutput)++;
-        // }
-
-        out2 = realloc(out2, lenOut2-(N - (lenInput%N)) * sizeof *out2);
-        (*output) = out2;
-        (*lenOutput) = lenOut2-(N - (lenInput%N));
-
-        printf("\n freeing out2...\n");
         free(out2);
     }
 }
@@ -381,7 +300,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     }
 
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    MPI_Barrier(MPI_COMM_WORLD);
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
@@ -413,17 +332,19 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     float *myOutput;
     int lenMyOutput;
 
-    if ( myRank == 0 )
-    {
-        double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
+    double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
+
+    // if ( myRank == 0 )
+    // {
+    //     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
         
-        printf("\n\n");
-        for (int i=0; i<lenMyOutput; i++)
-        {
-            printf("output[i=%d]=%f", i, myOutput[i]);
-            printf("\nlenMyOutput=%d\n", lenMyOutput);
-        }
-    }
+    //     printf("\n\n");
+    //     for (int i=0; i<lenMyOutput; i++)
+    //     {
+    //         printf("output[i=%d]=%f", i, myOutput[i]);
+    //         printf("\nlenMyOutput=%d\n", lenMyOutput);
+    //     }
+    // }
 
     int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
     int div = lenOutput/NUM_OF_RANKS;
@@ -448,31 +369,17 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         // printf("\nrecvcounts[x=%d]=%d and recvDispls[x=%d]=%d", x, recvcounts[x], x, recvDispls[x] );
     }
 
+    // MPI_Barrier(MPI_COMM_WORLD);
+
     MPI_Gatherv(
-        myOutput,                           // void *sendbuf[in]: The handle to a buffer that contains the data to be sent to the root process.
-        lenMyOutput,                        // int sendcount[in]: The number of elements in the send buffer.
-        MPI_FLOAT,                          // MPI_Datatype sendtype: The data type of each element in the buffer.
-        (*output),                          // void *recvbuf[out]: The handle to a buffer on the root process that contains the data that is received from each process, including data that is sent by the root process.
-        recvcounts,                         // int *recvcounts[][in]: The number of elements that is received from each process.
-        recvDispls,                          // int *displs[][in]:
-        MPI_FLOAT,                          // MPI_Datatype recvtype:
-        0,                                  // int root:
-        MPI_COMM_WORLD                      // MPI_Comm comm:
+        myOutput,               // void *sendbuf[in]: The handle to a buffer that contains the data to be sent to the root process.
+        lenMyOutput,            // int sendcount[in]: The number of elements in the send buffer.
+        MPI_FLOAT,              // MPI_Datatype sendtype: The data type of each element in the buffer.
+        (*output),              // void *recvbuf[out]: The handle to a buffer on the root process that contains the data that is received from each process, including data that is sent by the root process.
+        recvcounts,             // int *recvcounts[][in]: The number of elements that is received from each process.
+        recvDispls,             // int *displs[][in]:
+        MPI_FLOAT,              // MPI_Datatype recvtype:
+        0,                      // int root:
+        MPI_COMM_WORLD          // MPI_Comm comm:
     );
-
-    // single_layer_convolution(M-K1+1, N-K1+1, myOutput1, K2, kernel2, &myOutput2);
-    // printf("%f", myOutput2[0]);
-
-    // // getter
-    // if (myrank==0) {
-    //     output = malloc(N * sizeof *output);
-    // }
-    // MPI_Reduce(my_y, // Send buffer.
-    //            y, // Receive buffer.
-    //            N,
-    //            MPI_DOUBLE,
-    //            MPI_SUM,
-    //            0, // Root, the result ends up here.
-    //            MPI_COMM_WORLD
-    // );
 }

@@ -12,36 +12,15 @@
 #include "MPI_double_layer_convolution.c"
 
 
-float **allocate_2D(int M, int N) 
-{
-    float *A_storage= (float*)malloc(M * N*sizeof(float));
-    float **A = (float**)malloc(M * sizeof(float*));
-
-    for (int i=0; i<M; i++) 
-        A[i] = &(A_storage[i*N]);
-
-    return A;
-}
-
-
-//  5x5 kernel:
-// [[1 1 1 1 1][1 1 1 1 1][0 0 0 0 0][-1 -1 -1 -1 -1][-1 -1 -1 -1 -1]]
-
-/*
-Arguments:
-~~~~~~~~~~~~~~~~~~~~~
-M for # of rows
-N for # of columns
-
-*/
 int main(int argc, char *argv[]) 
 {
+    size_t u, i, j;
     int M=0, N=0, K1=0, K2=0, rank, size;
     float *input=NULL, *output=NULL, *kernel1=NULL, *kernel2=NULL;
     
-    MPI_Init(&argc, &argv);  // Initiating MPI
-    MPI_Comm_size(MPI_COMM_WORLD, &size);  // # of processes.
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);  // currently rank.
+    MPI_Init(&argc, &argv);                 // Initiating MPI
+    MPI_Comm_size(MPI_COMM_WORLD, &size);   // # of processes.
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);   // currently rank.
 
     if ( rank == 0 )
     {
@@ -70,25 +49,21 @@ int main(int argc, char *argv[])
 
         // fill 2D array 'input' with some values;
         int count = 0;
-        for ( int i = 0; i < M; i++ )
-            for ( int j=0; j < N; j++ )
+        for ( i = 0; i < M; i++ )
+            for ( j=0; j < N; j++ )
                 input[i*N + j] = ++count;
 
         // fill kernel1 with some values;
         int bi=0;
-        for ( int i = 0; i < K1; i++ )
-            for ( int j=0; j < K1; j++ )
+        for ( i = 0; i < K1; i++ )
+            for ( j=0; j < K1; j++ )
                 bi = kernel1[i*K1 + j] = (bi==0) ? 1 : 0;
-        
-        // for ( int a=0; a < K1*K1; a++) printf("%f ", kernel1[a]);
         
         // fill kernel2 with some values;
         bi=1;
-        for ( int i = 0; i < K2; i++ )
-            for ( int j=0; j < K2; j++ )
+        for ( i = 0; i < K2; i++ )
+            for ( j=0; j < K2; j++ )
                 bi = kernel2[i*K2 + j] = (bi==0) ? 1 : 0;
-        
-        // for ( int a=0; a < K2*K2; a++) printf("b%f ", kernel2[a]);
     }
 
     // process 0 broadcasts values of M, N, K1, K2 to all the other processes
@@ -114,6 +89,7 @@ int main(int argc, char *argv[])
 
     if ( rank == 0 )
     {
+        // for ( int u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ ) printf("\noutput[u=%d]=%f", u, output[u]);
         // for example, compare the content of array 'output' with that is
         // produced by the sequential function double_layer_convolution
         float *seq_output1, *seq_output2;
@@ -125,18 +101,16 @@ int main(int argc, char *argv[])
         
         // computing if both techniques return equal values
         int is_equal;
-        for ( int i = 0; i < (M-K1-K2+2); i++ )
-            for ( int j = 0; j < (N-K1-K2+2); j++ )
-                is_equal = ( seq_output2[i*(M-K1-K2+2) +j]==output[i*(M-K1-K2+2) +j] ) ? 1 : 0;
+        for ( u = 0; u < (M-K1-K2+2)*(N-K1-K2+2); u++ )
+        {
+            is_equal = seq_output2[u]==output[u] ? 1 : 0;
+        }
         
-        if ( is_equal==1 )
-            printf("The serialized and MPI paralelized outputs are equal.");
-        else
-            printf("The serialized and MPI paralelized outputs are NOT equal.");
+        if ( is_equal==1 ) printf("The serialized and MPI paralelized outputs are equal.");
+        else printf("The serialized and MPI paralelized outputs are NOT equal.");
         
         free(seq_output2);
     }
-
     MPI_Finalize();
     return 0;
 }
