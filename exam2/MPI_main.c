@@ -1,6 +1,3 @@
-// Author: Fabio Rodrigues Pereira
-// E-mail: fabior@uio.no
-
 // compiling & running
 // mpicc -o MPI_main MPI_main.c
 // mpirun -np 2 ./MPI_main 6 5 3 2
@@ -17,6 +14,7 @@ int main(int argc, char *argv[])
     int u, i, j;
     int M=0, N=0, K1=0, K2=0, rank, size;
     float *input=NULL, *output=NULL, *kernel1=NULL, *kernel2=NULL;
+    double t0, t1, t2, t3;
     
     MPI_Init(&argc, &argv);                 // Initiating MPI
     MPI_Comm_size(MPI_COMM_WORLD, &size);   // # of processes.
@@ -78,9 +76,8 @@ int main(int argc, char *argv[])
     MPI_Bcast(kernel2, K2*K2, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
     // parallel computation of a multi-layer convolution
-    // if (rank == 0) MPI_double_layer_convolution(M, N, input, K1, kernel1, K2, kernel2, &output);
     MPI_double_layer_convolution(M, N, input, K1, kernel1, K2, kernel2, &output);
-
+    
     if ( rank == 0 )
     {
         // for example, compare the content of array 'output' with that is
@@ -90,7 +87,7 @@ int main(int argc, char *argv[])
         single_layer_convolution(M-K1+1, N-K1+1, seq_output1, K2, kernel2, &seq_output2);
         
         // freeing unnecessary array
-        // free(seq_output1);
+        free(seq_output1);
         
         // computing if both techniques return equal values
         int is_equal=0;
@@ -103,7 +100,7 @@ int main(int argc, char *argv[])
         if ( is_equal==0 ) printf("The serialized and MPI paralelized outputs are equal.\n");
         else printf("The serialized and MPI paralelized outputs are NOT equal.\n");
         
-        // free(seq_output2);
+        free(seq_output2);
     }
     MPI_Finalize();
     return 0;

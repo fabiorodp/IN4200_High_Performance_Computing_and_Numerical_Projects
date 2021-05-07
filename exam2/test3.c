@@ -10,12 +10,13 @@
 #include <stdlib.h>
 
 
-#define NUM_OF_RANKS 6
+#define NUM_OF_RANKS 4
 #define maxNeededRanks 6
 
 
 int main( int argc, char **argv )
 {
+    size_t i, j, x, count, sum, entry;
     int M=6, N=5, K1=3, K2=2;
     int matrix[30] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                       16, 17,18,19,20,21,22,23,24,25,26,27,
@@ -38,9 +39,9 @@ int main( int argc, char **argv )
         // NUM_OF_RANKS=6 >> 6 blocks with 1 element
         // returning displs[NUM_OF_RANKS=6] = {0,1,5,6,10,11}
         // returning num_elements[NUM_OF_RANKS=6] = {19, 19, 19, 19, 19, 19}
-        int count = 0;
-        for ( int i = 0; i < M_out; i++ )
-            for ( int j = 0; j < N_out; j++ )
+        count = 0;
+        for ( i = 0; i < M_out; i++ )
+            for ( j = 0; j < N_out; j++ )
             {
                 displs[count] = i*N+j;
                 num_elements[count] = (K1+K2-2)*(N+1)+1;
@@ -59,15 +60,15 @@ int main( int argc, char **argv )
         int displs_maxRank[maxNeededRanks];                         // [0,1,5,6,10,11]
 
         // calculate displacement and number of elements for all possible ranks (maxRanks)
-        int count = 0;
-        for ( int i = 0; i < M_out; i++ )
-            for ( int j = 0; j < N_out; j++ )
+        count = 0;
+        for ( i = 0; i < M_out; i++ )
+            for ( j = 0; j < N_out; j++ )
             {
                 displs_maxRank[count] = i*N+j;
                 count++;
             }
         
-        for ( int entry = 0; entry < (numBlocks+numBlocks_remainder); entry++ )
+        for ( entry = 0; entry < (numBlocks+numBlocks_remainder); entry++ )
         {
             if ( entry < numBlocks )  // 0, 1
             {
@@ -87,8 +88,7 @@ int main( int argc, char **argv )
         }
     }
 
-    for ( int x = 0; x < NUM_OF_RANKS; x++ )
-        printf("disp=%d and #elements=%d\n", displs[x], num_elements[x]);
+    for ( x = 0; x < NUM_OF_RANKS; x++ ) printf("disp=%d and #elements=%d\n", displs[x], num_elements[x]);
 
     int div = lenOutput/NUM_OF_RANKS;
     int rem = lenOutput%NUM_OF_RANKS;
@@ -99,10 +99,10 @@ int main( int argc, char **argv )
     // The location, relative to the recvbuf parameter, of the data from each communicator process. 
     // The data that is received from process j is placed into the receive buffer of the root process 
     // offset displs[x] elements from the sendbuf pointer.
-    int *recvDispls = malloc( NUM_OF_RANKS * sizeof *displs );
+    int *recvDispls = malloc( NUM_OF_RANKS * sizeof *recvDispls );
 
-    int sum = 0;
-    for ( int x = 0; x < NUM_OF_RANKS; x++ )
+    sum = 0;
+    for ( x = 0; x < NUM_OF_RANKS; x++ )
     {
         if ( x < NUM_OF_RANKS-(lenOutput%NUM_OF_RANKS) ) recvcounts[x] = div;
         else recvcounts[x] = div+1;

@@ -19,7 +19,9 @@ ____
 
 ## Example of a main test:
 ```
-For Matrix:
+For M=6, N=5, K1=3, K2=2 and 2 Processes
+
+with Matrix:
 1  2  3  4  5
 6  7  8  9  10
 11 12 13 14 15

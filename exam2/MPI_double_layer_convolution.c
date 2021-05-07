@@ -1,6 +1,3 @@
-// Author: Fabio Rodrigues Pereira
-// E-mail: fabior@uio.no
-
 
 /*
 A convolutional kernel is applied to an input array in a serialized fashion.
@@ -38,6 +35,7 @@ void single_layer_convolution(int M, int N, float *input, int K, float *kernel, 
             }     
 }
 
+
 /*
 Double convolutional kernels are applied to an input array.
 */
@@ -73,7 +71,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         // freeing unnecessary array input
-        // free(input);
+        free(input);
         
         // computations of the first convolution:
         single_layer_convolution(M1_rank, N, resizedInput, K1, kernel1, &out1);
@@ -82,7 +80,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
         
         // freeing unnecessary out1
-        // free(out1);
+        free(out1);
         
         // truncating output[out] to have only the needed element values
         (*lenOutput) = 0;
@@ -94,7 +92,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         // freeing unnecessary out2
-        // free(out2);
+        free(out2);
     }
 
     else if ( (r != 0) && (myRank == 0) )
@@ -103,19 +101,19 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         for ( i = 0; i < len; i++ ) resizedInput[i] = input[i];
 
         // freeing unnecessary input
-        // free(input);
+        free(input);
         
         // computations of the first convolution:
         single_layer_convolution(M1_rank, N, resizedInput, K1, kernel1, &out1);
 
         // freeing unnecessary resizedInput
-        // free(resizedInput);
+        free(resizedInput);
 
         // computations of the second convolution:
         single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
 
         // freeing unnecessary out1
-        // free(out1);
+        free(out1);
 
         // truncating output[out] to have only the needed values 
         // assingning values in output[out] array
@@ -128,7 +126,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         // freeing unnecessary out2
-        // free(out2);
+        free(out2);
     }
 
     else
@@ -137,20 +135,20 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         single_layer_convolution(M1_rank, N, input, K1, kernel1, &out1);
 
         // freeing unnecessary resizedInput
-        // free(input);
+        free(input);
 
         // computations of the second convolution:
         single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
 
         // freeing unnecessary out1
-        // free(out1);
+        free(out1);
 
         // assingning values in output[out] array
         for ( i = 0; i < lenOut2; i++ ) (*output)[i] = out2[i];
         (*lenOutput) = lenOut2;   // returning the length for the array output
         
         // freeing unnecessary out2
-        // free(out2);
+        free(out2);
     }
 }
 
@@ -240,6 +238,7 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
                 count++;
             }
     }
+
     else
     {
         // calculate displacement and number of elements for each rank
@@ -279,10 +278,10 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
             }
         }
         
-        // free(displs_maxRank);
+        free(displs_maxRank);
     }
     
-    for ( i = 0; i < NUM_OF_RANKS; i++ ) printf("\nnum_elements[myRank=%d]=%d", i, num_elements[i]);
+    // for ( i = 0; i < NUM_OF_RANKS; i++ ) printf("\nnum_elements[myRank=%d]=%d", i, num_elements[i]);
     myInput = malloc( num_elements[myRank] * sizeof *myInput );
     MPI_Barrier(MPI_COMM_WORLD);
     
