@@ -290,62 +290,72 @@ void MPI_double_layer_convolution(int M, int N, float *input, int K1, float *ker
                 printf("\nnum_elements[%d]=%d", entry, displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem);
             }
         }
+        
+        free(displs_maxRank);
     }
     
-    // myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    // MPI_Barrier(MPI_COMM_WORLD);
+    printf("num_elements[myRank]", myRank, num_elements[myRank]);
+    myInput = malloc( num_elements[myRank] * sizeof *myInput );
+    MPI_Barrier(MPI_COMM_WORLD);
     
-    // // Scatter A and x.
-    // MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
-    //                                                                         by the root process.
-    //                                     */
-    //              num_elements,          // int *sendcounts [in]:            The number of elements to send to each process.
-    //              displs,                /* int *displs [in]:                The locations of the data to send to each communicator 
-    //                                                                         process. Each location in the array is relative to the 
-    //                                                                         corresponding element of the sendbuf array. In the sendbuf, 
-    //                                                                         sendcounts, and displs parameter arrays, the nth element of 
-    //                                                                         each array refers to the data to be sent to the nth 
-    //                                                                         communicator process.
-    //                                     */
-    //              MPI_FLOAT,             // MPI_Datatype sendtype [in]:      The MPI data type of each element in the buffer.
-    //              myInput,               /* void *recvbuf [out]:             The pointer to a buffer that contains the data that is 
-    //                                                                         received on each process.
-    //                                     */
-    //              num_elements[myRank],  /* int recvcount [out]:             The number of elements in the receive buffer. If the 
-    //                                                                         count is zero, the data part of the message is empty. 
-    //                                     */
-    //              MPI_FLOAT,             // MPI_Datatype recvtype [out]:     The data type of the elements in the receive buffer.
-    //              0,                     /* int root:                        The rank in the sending process within the specified 
-    //                                                                         communicator.
-    //                                     */
-    //              MPI_COMM_WORLD         // MPI_Comm comm:                   The MPI_Comm communicator handle.
-    // );
+    // Scatter A and x.
+    MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
+                                                                            by the root process.
+                                        */
+                 num_elements,          // int *sendcounts [in]:            The number of elements to send to each process.
+                 displs,                /* int *displs [in]:                The locations of the data to send to each communicator 
+                                                                            process. Each location in the array is relative to the 
+                                                                            corresponding element of the sendbuf array. In the sendbuf, 
+                                                                            sendcounts, and displs parameter arrays, the nth element of 
+                                                                            each array refers to the data to be sent to the nth 
+                                                                            communicator process.
+                                        */
+                 MPI_FLOAT,             // MPI_Datatype sendtype [in]:      The MPI data type of each element in the buffer.
+                 myInput,               /* void *recvbuf [out]:             The pointer to a buffer that contains the data that is 
+                                                                            received on each process.
+                                        */
+                 num_elements[myRank],  /* int recvcount [out]:             The number of elements in the receive buffer. If the 
+                                                                            count is zero, the data part of the message is empty. 
+                                        */
+                 MPI_FLOAT,             // MPI_Datatype recvtype [out]:     The data type of the elements in the receive buffer.
+                 0,                     /* int root:                        The rank in the sending process within the specified 
+                                                                            communicator.
+                                        */
+                 MPI_COMM_WORLD         // MPI_Comm comm:                   The MPI_Comm communicator handle.
+    );
 
-    // // computing the convolutions
-    // double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
+    // computing the convolutions
+    double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
 
-    // // The location, relative to the recvbuf parameter, of the data from each communicator process. 
-    // // The data that is received from process j is placed into the receive buffer of the root process 
-    // // offset displs[x] elements from the sendbuf pointer.
-    // sum = 0;
-    // for ( u = 0; u < NUM_OF_RANKS; u++ )
-    // {
-    //     if ( u < NUM_OF_RANKS-rem ) recvcounts[u] = div;
-    //     else recvcounts[u] = div+1;
+    // The location, relative to the recvbuf parameter, of the data from each communicator process. 
+    // The data that is received from process j is placed into the receive buffer of the root process 
+    // offset displs[x] elements from the sendbuf pointer.
+    sum = 0;
+    for ( u = 0; u < NUM_OF_RANKS; u++ )
+    {
+        if ( u < NUM_OF_RANKS-rem ) recvcounts[u] = div;
+        else recvcounts[u] = div+1;
 
-    //     sum += u == 0 ? 0 : recvcounts[u-1];
-    //     recvDispls[u] = u == 0 ? 0 : sum;
-    // }
+        sum += u == 0 ? 0 : recvcounts[u-1];
+        recvDispls[u] = u == 0 ? 0 : sum;
 
-    // MPI_Gatherv(
-    //     myOutput,               // void *sendbuf[in]: The handle to a buffer that contains the data to be sent to the root process.
-    //     lenMyOutput,            // int sendcount[in]: The number of elements in the send buffer.
-    //     MPI_FLOAT,              // MPI_Datatype sendtype: The data type of each element in the buffer.
-    //     *output,                // void *recvbuf[out]: The handle to a buffer on the root process that contains the data that is received from each process, including data that is sent by the root process.
-    //     recvcounts,             // int *recvcounts[][in]: The number of elements that is received from each process.
-    //     recvDispls,             // int *displs[][in]:
-    //     MPI_FLOAT,              // MPI_Datatype recvtype:
-    //     0,                      // int root:
-    //     MPI_COMM_WORLD          // MPI_Comm comm:
-    // );
+        printf("\nrecvcounts=%d and recvDispls=%d", recvcounts[u], recvDispls[u]);
+    }
+
+    MPI_Gatherv(
+        myOutput,               // void *sendbuf[in]: The handle to a buffer that contains the data to be sent to the root process.
+        lenMyOutput,            // int sendcount[in]: The number of elements in the send buffer.
+        MPI_FLOAT,              // MPI_Datatype sendtype: The data type of each element in the buffer.
+        *output,                // void *recvbuf[out]: The handle to a buffer on the root process that contains the data that is received from each process, including data that is sent by the root process.
+        recvcounts,             // int *recvcounts[][in]: The number of elements that is received from each process.
+        recvDispls,             // int *displs[][in]:
+        MPI_FLOAT,              // MPI_Datatype recvtype:
+        0,                      // int root:
+        MPI_COMM_WORLD          // MPI_Comm comm:
+    );
+    free(num_elements);
+    free(displs);
+    free(recvcounts);
+    free(recvDispls);
+    free(myInput);
 }
