@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         single_layer_convolution(M-K1+1, N-K1+1, seq_output1, K2, kernel2, &seq_output2);
         
         // freeing unnecessary array
-        free(seq_output1);
+        // free(seq_output1);
         
         // computing if both techniques return equal values
         int is_equal=0;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         if ( is_equal==0 ) printf("The serialized and MPI paralelized outputs are equal.\n");
         else printf("The serialized and MPI paralelized outputs are NOT equal.\n");
         
-        free(seq_output2);
+        // free(seq_output2);
     }
     MPI_Finalize();
     return 0;
