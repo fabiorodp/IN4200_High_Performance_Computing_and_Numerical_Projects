@@ -107,7 +107,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         {
             if ( i >= lenInput ) resizedInput[i] = 0;
             else resizedInput[i] = input[i];
-            printf("%d", resizedInput[i]);
+            printf("%f\n", resizedInput[i]);
         }
 
         // freeing unnecessary input
