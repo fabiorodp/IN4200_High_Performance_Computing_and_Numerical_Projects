@@ -28,7 +28,9 @@ int main( int argc, char **argv )
     // output row and col sizes
     int M_out = M - (K1-1) - (K2-1);  // 6-(3-1)-(2-1) = 3
     int N_out = N - (K1-1) - (K2-1);  // 5-(3-1)-(2-1) = 2
-    int lenElem = (K1+K2-2)*(N+1)+1;  // (3+2-2)*(5+1)+1 = 19
+    int lenInput = M*N;
+    int lenOutput = M_out*N_out;
+    int minNumElem = (K1+K2-2)*(N+1)+1;  // (3+2-2)*(5+1)+1 = 19
 
     if ( NUM_OF_RANKS == maxNeededRanks )
     {
@@ -70,34 +72,24 @@ int main( int argc, char **argv )
             if ( entry < numBlocks )  // 0, 1
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
-                num_elements[entry] = displs_maxRank[numEntries-1]+lenElem;
+                num_elements[entry] = displs_maxRank[numEntries-1]+minNumElem;
             }
             else if ( entry == numBlocks )
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
-                num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+lenElem;
+                num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem;
             }
             else  // 2, 3
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries+1] );
-                num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+lenElem;
+                num_elements[entry] = displs_maxRank[NUM_OF_RANKS-numBlocks_remainder+numEntries]-displs_maxRank[NUM_OF_RANKS-numBlocks_remainder]+minNumElem;
             }
         }
     }
 
     for ( int x = 0; x < NUM_OF_RANKS; x++ )
-    {
         printf("disp=%d and #elements=%d\n", displs[x], num_elements[x]);
-        int M1_rank = (num_elements[x]%N)!=0 ? num_elements[x] / N + (N - (num_elements[x]%N)) : num_elements[x] / N;
-        printf("M1_rank=%d\n", M1_rank);
-        int M2_rank = M1_rank-K1+1;
-        printf("M2_rank=%d\n", M2_rank);
-        int N2_rank = N-K1+1;
-        printf("N2_rank=%d\n", N2_rank);
 
-    }
-
-    int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
     int div = lenOutput/NUM_OF_RANKS;
     int rem = lenOutput%NUM_OF_RANKS;
 
