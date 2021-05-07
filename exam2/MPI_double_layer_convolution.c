@@ -101,6 +101,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
     {
         // resizing to the correct shape of the matrix
         len = lenInput + (N - (lenInput%N));
+        printf("len=%d", len);
         resizedInput = malloc(len * sizeof *resizedInput);
 
         for ( i=0; i < len; i++ )
