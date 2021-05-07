@@ -250,14 +250,26 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         // participants=6 >> 6 blocks with 1 element
         // returning displs[participants=6] = {0,1,5,6,10,11}
         // returning num_elements[participants=6] = {19, 19, 19, 19, 19, 19}
-        int count = 0;
-        for ( int i = 0; i < M_out; i++ )
-            for ( int j = 0; j < N_out; j++ )
-            {
-                displs[count] = i*N+j;
-                num_elements[count] = minNumElem;
-                count++;
-            }
+        
+        // int count = 0;
+        // for ( int i = 0; i < M_out; i++ )
+        //     for ( int j = 0; j < N_out; j++ )
+        //     {
+        //         displs[count] = i*N+j;
+        //         num_elements[count] = minNumElem;
+        //         count++;
+        //     }
+        
+        int sum = 0;
+        for ( int u = 0; u < participants; u++ )
+        {
+            num_elements[u] = minNumElem;
+            
+            sum += u == 0 ? 0 : num_elements[u-1];
+            displs[u] = u == 0 ? 0 : sum;
+
+            // printf("\nnumElem=%d", num_elements[u]);
+        }
     }
 
     else
@@ -302,12 +314,14 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
     for ( int t = 0; t < participants; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
-    // printf("ERROR\n");
-    // printf("ERROR\n");
+
     MPI_Barrier(MPI_COMM_WORLD);
 
     int ui = 10;
     printf("%d", ui);
+
+    printf("ERROR\n");
+    printf("ERROR\n");
     
     // Scatter A and x.
     MPI_Scatterv(input,                 /* void *sendbuf [in]:              The pointer to a buffer that contains the data to be sent 
