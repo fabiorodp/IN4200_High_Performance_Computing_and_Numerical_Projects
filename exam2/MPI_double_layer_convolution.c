@@ -227,7 +227,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     // calculate displacements and number of rows for each process.
-    int participants, remain;
+    int participants;
     if ( NUM_OF_RANKS > maxNeededRanks ) participants = maxNeededRanks;
     else participants = NUM_OF_RANKS;
 
@@ -239,11 +239,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     int M_out = M - (K1-1) - (K2-1);
     int N_out = N - (K1-1) - (K2-1);
     int lenElem = (K1+K2-2)*(N+1)+1;
-
-    printf("Error here\n");
-    printf("Error here\n");
-    printf("Error here\n");
-    printf("Error here\n");
 
     if ( participants == maxNeededRanks )
     {
@@ -338,21 +333,21 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
 
     int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
-    int div = lenOutput/NUM_OF_RANKS;
-    int rem = lenOutput%NUM_OF_RANKS;
+    int div = lenOutput/participants;
+    int rem = lenOutput%participants;
 
     // computing the number of elements that is received from each process.
-    int *recvcounts = malloc( NUM_OF_RANKS * sizeof *recvcounts );
+    int *recvcounts = malloc( participants * sizeof *recvcounts );
 
     // The location, relative to the recvbuf parameter, of the data from each communicator process. 
     // The data that is received from process j is placed into the receive buffer of the root process 
     // offset displs[x] elements from the sendbuf pointer.
-    int *recvDispls = malloc( NUM_OF_RANKS * sizeof *displs );
+    int *recvDispls = malloc( participants * sizeof *displs );
 
     int sum = 0;
-    for ( int x = 0; x < NUM_OF_RANKS; x++ )
+    for ( int x = 0; x < participants; x++ )
     {
-        if ( x < NUM_OF_RANKS-rem ) recvcounts[x] = div;
+        if ( x < participants-rem ) recvcounts[x] = div;
         else recvcounts[x] = div+1;
 
         sum += x == 0 ? 0 : recvcounts[x-1];

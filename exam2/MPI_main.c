@@ -28,13 +28,6 @@ int main(int argc, char *argv[])
         M = atoi(argv[1]); N = atoi(argv[2]); 
         K1 = atoi(argv[3]); K2 = atoi(argv[4]);
 
-        if (size > N) 
-        {
-            printf("Error: N has to be larger than the amount of MPI processes.\n");
-            MPI_Finalize();
-            return 1;
-        }
-
         // allocate 2D array 'input' with M rows and N columns;
         input = malloc( M * N * sizeof *input );
 
