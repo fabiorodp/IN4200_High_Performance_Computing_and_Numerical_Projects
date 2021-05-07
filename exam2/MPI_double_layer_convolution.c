@@ -128,6 +128,8 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         // truncating output[out] to have only the needed values 
         (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
 
+        printf("Error here");
+
         // assingning values in output[out] array
         (*lenOutput) = 0;
         for ( s = 0; s < lenOut2; s++ )
