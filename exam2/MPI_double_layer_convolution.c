@@ -53,7 +53,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
     float *resizedInput, *out1, *out2;
     double temp;
 
-    M1_rank = lenInput/N + N - (lenInput%N);
+    M1_rank = (lenInput%N)!=0 ? lenInput / N + (N - (lenInput%N)) : lenInput / N;
     lenOut1 = (M1_rank-K1+1) * (N-K1+1);
     out1 = malloc( lenOut1 * sizeof *out1 );
     printf("\nlenOut1=%d\n", lenOut1 );
@@ -292,7 +292,7 @@ root, to collect the computed results from all the processes.
 */
 void MPI_double_layer_convolution(int M, int N, float *input, 
                                   int K1, float *kernel1, int K2, 
-                                  float *kernel2, float *output)
+                                  float *kernel2, float **output)
 {
     // calculate max needed processes
     int maxNeededRanks = (M-K1-K2+2) * (N-K1-K2+2);
@@ -362,7 +362,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         
         for ( int entry = 0; entry < (numBlocks+numBlocks_remainder); entry++ )
         {
-            if ( entry < numBlocks )  // 0, 1
+            if ( entry < numBlocks )
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
                 num_elements[entry] = displs_maxRank[numEntries-1]+lenElem;
@@ -372,7 +372,7 @@ void MPI_double_layer_convolution(int M, int N, float *input,
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
                 num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+lenElem;
             }
-            else  // 2, 3
+            else
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries+1] );
                 num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+lenElem;
@@ -424,7 +424,41 @@ void MPI_double_layer_convolution(int M, int N, float *input,
             printf("\nlenMyOutput=%d\n", lenMyOutput);
         }
     }
-        
+
+    int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
+    int div = lenOutput/NUM_OF_RANKS;
+    int rem = lenOutput%NUM_OF_RANKS;
+
+    // computing the number of elements that is received from each process.
+    int *recvcounts = malloc( NUM_OF_RANKS * sizeof *recvcounts );
+
+    // The location, relative to the recvbuf parameter, of the data from each communicator process. 
+    // The data that is received from process j is placed into the receive buffer of the root process 
+    // offset displs[x] elements from the sendbuf pointer.
+    int *recvDispls = malloc( NUM_OF_RANKS * sizeof *displs );
+
+    int sum = 0;
+    for ( int x = 0; x < NUM_OF_RANKS; x++ )
+    {
+        if ( x < NUM_OF_RANKS-(lenOutput%NUM_OF_RANKS) ) recvcounts[x] = div;
+        else recvcounts[x] = div+1;
+
+        sum += x == 0 ? 0 : recvcounts[x-1];
+        recvDispls[x] = x == 0 ? 0 : sum;
+        // printf("\nrecvcounts[x=%d]=%d and recvDispls[x=%d]=%d", x, recvcounts[x], x, recvDispls[x] );
+    }
+
+    MPI_Gatherv(
+        myOutput,                           // void *sendbuf[in]: The handle to a buffer that contains the data to be sent to the root process.
+        lenMyOutput,                        // int sendcount[in]: The number of elements in the send buffer.
+        MPI_FLOAT,                          // MPI_Datatype sendtype: The data type of each element in the buffer.
+        (*output),                          // void *recvbuf[out]: The handle to a buffer on the root process that contains the data that is received from each process, including data that is sent by the root process.
+        recvcounts,                         // int *recvcounts[][in]: The number of elements that is received from each process.
+        recvDispls,                          // int *displs[][in]:
+        MPI_FLOAT,                          // MPI_Datatype recvtype:
+        0,                                  // int root:
+        MPI_COMM_WORLD                      // MPI_Comm comm:
+    );
 
     // single_layer_convolution(M-K1+1, N-K1+1, myOutput1, K2, kernel2, &myOutput2);
     // printf("%f", myOutput2[0]);

@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 
-#define NUM_OF_RANKS 5
+#define NUM_OF_RANKS 6
 #define maxNeededRanks 6
 
 
@@ -86,7 +86,40 @@ int main( int argc, char **argv )
     }
 
     for ( int x = 0; x < NUM_OF_RANKS; x++ )
+    {
         printf("disp=%d and #elements=%d\n", displs[x], num_elements[x]);
+        int M1_rank = (num_elements[x]%N)!=0 ? num_elements[x] / N + (N - (num_elements[x]%N)) : num_elements[x] / N;
+        printf("M1_rank=%d\n", M1_rank);
+        int M2_rank = M1_rank-K1+1;
+        printf("M2_rank=%d\n", M2_rank);
+        int N2_rank = N-K1+1;
+        printf("N2_rank=%d\n", N2_rank);
 
+    }
+
+    int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
+    int div = lenOutput/NUM_OF_RANKS;
+    int rem = lenOutput%NUM_OF_RANKS;
+
+    // computing the number of elements that is received from each process.
+    int *recvcounts = malloc( NUM_OF_RANKS * sizeof *recvcounts );
+
+    // The location, relative to the recvbuf parameter, of the data from each communicator process. 
+    // The data that is received from process j is placed into the receive buffer of the root process 
+    // offset displs[x] elements from the sendbuf pointer.
+    int *recvDispls = malloc( NUM_OF_RANKS * sizeof *displs );
+
+    int sum = 0;
+    for ( int x = 0; x < NUM_OF_RANKS; x++ )
+    {
+        if ( x < NUM_OF_RANKS-(lenOutput%NUM_OF_RANKS) ) recvcounts[x] = div;
+        else recvcounts[x] = div+1;
+
+        sum += x == 0 ? 0 : recvcounts[x-1];
+        recvDispls[x] = x == 0 ? 0 : sum;
+        // printf("\nrecvcounts[x=%d]=%d and recvDispls[x=%d]=%d", x, recvcounts[x], x, recvDispls[x] );
+    }
+
+    // printf("\n%d\n", lenOutput);
     return 0;
 }

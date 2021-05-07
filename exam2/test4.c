@@ -20,8 +20,8 @@ int main( int argc, char **argv )
     int ndims, order; 
     
     // output row and col sizes
-    int out_num_rows = M - K1 - K2 + 2;  // 3
-    int out_num_cols = N - K1 - K2 + 2;  // 2
+    int M_out = M - K1 - K2 + 2;  // 3
+    int N_out = N - K1 - K2 + 2;  // 2
 
     // MPI_Type_create_subarray
     if ( rank == 0)
@@ -39,7 +39,7 @@ int main( int argc, char **argv )
         {
             ndims=2;
             int array_of_sizes[2]={M,N};
-            int array_of_subsizes[2]={out_num_rows,out_num_cols};
+            int array_of_subsizes[2]={M_out,N_out};
             int array_of_starts[2];
             order = MPI_ORDER_C;
             MPI_Datatype oldtype = MPI_INT;
@@ -74,7 +74,7 @@ int main( int argc, char **argv )
     
     else if ( rank > 0 )
     {
-        int *subarray = malloc( out_num_rows * out_num_cols * sizeof *subarray);
+        int *subarray = malloc( M_out * N_out * sizeof *subarray);
         
         // receiving subarray
         MPI_Recv(
