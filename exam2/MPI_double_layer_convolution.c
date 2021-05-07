@@ -17,7 +17,7 @@ float **output: The output array in 1D array fashion.
 void single_layer_convolution(int M, int N, float *input, int K, float *kernel, float **output)
 {
     size_t i, j, ii, jj, x;
-    double temp;
+    float temp;
     
     // allocating the output array in 1D fashion
     (*output) = malloc( (M-K+1) * (N-K+1) * sizeof **output );
@@ -44,29 +44,26 @@ Double convolutional kernels are applied to an input array.
 void double_layer_convolution(int M, int N, float *input, int K1, int K2, float *kernel1,
                               float *kernel2, int lenInput, int myRank, float **output, int *lenOutput)
 {
+    // allocating global variables
     size_t s, i, j, ii, jj;
-    int len, M1_rank, M2_rank, N2_rank, lenOut1, lenOut2;
+    int len, M1_rank, M2_rank, N2_rank, lenOut2, q, r;
     float *resizedInput, *out1, *out2;
-    double temp;
 
     M1_rank = (lenInput%N)!=0 ? lenInput / N + (N - (lenInput%N)) : lenInput / N;
-    lenOut1 = (M1_rank-K1+1) * (N-K1+1);
-    out1 = malloc( lenOut1 * sizeof *out1 );
-
     M2_rank = (M1_rank-K1+1);
     N2_rank = (N-K1+1);
     lenOut2 = (M1_rank-K1-K2+2) * (N-K1-K2+2);
-    out2 = malloc( lenOut2 * sizeof *out1 );
+
+    // allocating arrays
+    q = lenInput/N;
+    r = lenInput%N;
+    len = lenInput + (N - r);
+    resizedInput = calloc(len, sizeof *resizedInput);
+    (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof *(*output));
 
     // resizing input array to be able to make the calculations
     if ( (lenInput%N != 0) && (myRank != 0) )
     {
-        int q = lenInput/N;
-        int r = lenInput%N;
-
-        len = lenInput + (N - r);
-        resizedInput = calloc(len, sizeof *resizedInput);
-        
         // resizing to the correct shape of the matrix
         for ( i=0; i < len; i++ )
         {
@@ -75,7 +72,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         // freeing unnecessary array input
-        // free(input);
+        free(input);
         
         // computations of the first convolution:
         single_layer_convolution(M1_rank, N, resizedInput, K1, kernel1, &out1);
@@ -84,11 +81,9 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
         
         // freeing unnecessary out1
-        // free(out1);
+        free(out1);
         
         // truncating output[out] to have only the needed element values
-        (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
-
         (*lenOutput) = 0;
         for ( s = 0; s < lenOut2; s++ )
         {
@@ -98,38 +93,30 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         // freeing unnecessary out2
-        // free(out2);
+        free(out2);
     }
 
     else if ( (lenInput%N != 0) && (myRank == 0) )
-    {
-        int q = lenInput/N;
-        int r = lenInput%N;
-        
-        len = lenInput + (N - r);
-        resizedInput = calloc(len, sizeof *resizedInput);
-        
+    {   
         // resizing to the correct shape of the matrix
         for ( i = 0; i < len; i++ ) resizedInput[i] = input[i];
 
         // freeing unnecessary input
-        // free(input);
+        free(input);
         
         // computations of the first convolution:
         single_layer_convolution(M1_rank, N, resizedInput, K1, kernel1, &out1);
 
         // freeing unnecessary resizedInput
-        // free(resizedInput);
+        free(resizedInput);
 
         // computations of the second convolution:
         single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
 
         // freeing unnecessary out1
-        // free(out1);
-        
-        // truncating output[out] to have only the needed values 
-        (*output) = malloc( lenOut2-(N - (lenInput%N)) * sizeof **output);
+        free(out1);
 
+        // truncating output[out] to have only the needed values 
         // assingning values in output[out] array
         (*lenOutput) = 0;
         for ( s = 0; s < lenOut2; s++ )
@@ -140,7 +127,7 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         }
 
         // freeing unnecessary out2
-        // free(out2);
+        free(out2);
     }
 
     else
@@ -149,24 +136,20 @@ void double_layer_convolution(int M, int N, float *input, int K1, int K2, float 
         single_layer_convolution(M1_rank, N, input, K1, kernel1, &out1);
 
         // freeing unnecessary resizedInput
-        // free(input);
+        free(input);
 
         // computations of the second convolution:
         single_layer_convolution(M2_rank, N2_rank, out1, K2, kernel2, &out2);
 
         // freeing unnecessary out1
-        // free(out1);
+        free(out1);
 
         // assingning values in output[out] array
-        (*lenOutput) = 0;
-        for ( s = 0; s < lenOut2; s++ )
-        {
-            (*output)[s] = out2[s];
-            (*lenOutput)++;
-        }
+        for ( s = 0; s < lenOut2; s++ ) (*output)[s] = out2[s];
+        (*lenOutput) = lenOut2;   // returning the length for the array output
         
         // freeing unnecessary out2
-        // free(out2);
+        free(out2);
     }
 }
 
@@ -224,18 +207,22 @@ void MPI_double_layer_convolution(int M, int N, float *input,
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     // global variables
+    size_t i, j, u, count, sum, entry;
+    float *myInput, *myOutput;
+    int lenMyOutput;
     int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
-
     int div = lenOutput/NUM_OF_RANKS;
     int rem = lenOutput%NUM_OF_RANKS;
-
-    // allocating arrays
-    int num_elements[NUM_OF_RANKS], displs[NUM_OF_RANKS];
-
-    // output row and col sizes
     int M_out = M - K1 - K2 + 2;
     int N_out = N - K1 - K2 + 2;
     int minNumElem = (K1+K2-2)*(N+1)+1;
+
+    // allocating arrays for the number of elements and displacement that is sent from each process.
+    int num_elements[NUM_OF_RANKS], displs[NUM_OF_RANKS], displs_maxRank[lenOutput];
+
+    // allocating arrays for the number of elements and displacement that is received from each process.
+    int recvcounts[NUM_OF_RANKS], recvDispls[NUM_OF_RANKS];
+    int numEntries, numBlocks_remainder, numBlocks;
 
     // calculate displacements and number of rows for each process.
     if ( NUM_OF_RANKS == lenOutput )
@@ -244,25 +231,23 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         // participants=6 >> 6 blocks with 1 element
         // returning displs[participants=6] = {0,1,5,6,10,11}
         // returning num_elements[participants=6] = {19, 19, 19, 19, 19, 19}
-        int count = 0;
-        for ( int i = 0; i < M_out; i++ )
-            for ( int j = 0; j < N_out; j++ )
-            {
-                displs[count] = i*N+j;
-                num_elements[count] = minNumElem;
-                count++;
-            }
+        // count = 0;
+        // for ( i = 0; i < M_out; i++ )
+        //     for ( j = 0; j < N_out; j++ )
+        //     {
+        //         displs[count] = i*N+j;
+        //         num_elements[count] = minNumElem;
+        //         count++;
+        //     }
         
-        // int sum = 0;
-        // for ( int u = 0; u < NUM_OF_RANKS; u++ )
-        // {
-        //     num_elements[u] = minNumElem;
+        sum = 0;
+        for ( u = 0; u < NUM_OF_RANKS; u++ )
+        {
+            num_elements[u] = minNumElem;
             
-        //     sum += u == 0 ? 0 : num_elements[u-1];
-        //     displs[u] = u == 0 ? 0 : sum;
-
-        //     // printf("\nnumElem=%d", num_elements[u]);
-        // }
+            sum += u == 0 ? 0 : num_elements[u-1];
+            displs[u] = u == 0 ? 0 : sum;
+        }
     }
 
     else
@@ -271,21 +256,20 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         // Example: NUM_OF_RANKS=4 >> 2 blocks with 1 element and 2 with 2 elements
         // returning displs[NUM_OF_RANKS=4] = {0,1,5,10}
         // returning num_elements[NUM_OF_RANKS=4] = {19, 19, 20, 20}
-        int numEntries = lenOutput/NUM_OF_RANKS;
-        int numBlocks_remainder = lenOutput%NUM_OF_RANKS;
-        int numBlocks = NUM_OF_RANKS - numBlocks_remainder;
-        int displs_maxRank[lenOutput];
+        numEntries = lenOutput/NUM_OF_RANKS;
+        numBlocks_remainder = lenOutput%NUM_OF_RANKS;
+        numBlocks = NUM_OF_RANKS - numBlocks_remainder;
 
         // calculate displacement and number of elements for all possible ranks (maxRanks)
-        int count = 0;
-        for ( int i = 0; i < M_out; i++ )
-            for ( int j = 0; j < N_out; j++ )
+        count = 0;
+        for ( i = 0; i < M_out; i++ )
+            for ( j = 0; j < N_out; j++ )
             {
                 displs_maxRank[count] = i*N+j;
                 count++;
             }
         
-        for ( int entry = 0; entry < (numBlocks+numBlocks_remainder); entry++ )
+        for ( entry = 0; entry < (numBlocks+numBlocks_remainder); entry++ )
         {
             if ( entry < numBlocks )
             {
@@ -305,8 +289,8 @@ void MPI_double_layer_convolution(int M, int N, float *input,
         }
     }
     
-    float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    // for ( int t = 0; t < NUM_OF_RANKS; t++ ) printf("num_elements[%d]=%d\n", myRank, num_elements[myRank]);
+    myInput = malloc( num_elements[myRank] * sizeof *myInput );
+    // for ( int u = 0; u < NUM_OF_RANKS; u++ ) printf("num_elements[%d]=%d\n", u, num_elements[u]);
     MPI_Barrier(MPI_COMM_WORLD);
     
     // Scatter A and x.
@@ -335,29 +319,20 @@ void MPI_double_layer_convolution(int M, int N, float *input,
                  MPI_COMM_WORLD         // MPI_Comm comm:                   The MPI_Comm communicator handle.
     );
 
-    // convolution operations inside ranks
-    float *myOutput;
-    int lenMyOutput;
-
     // computing the convolutions
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
-
-    // computing the number of elements that is received from each process.
-    int recvcounts[NUM_OF_RANKS];
 
     // The location, relative to the recvbuf parameter, of the data from each communicator process. 
     // The data that is received from process j is placed into the receive buffer of the root process 
     // offset displs[x] elements from the sendbuf pointer.
-    int recvDispls[NUM_OF_RANKS];
-
-    int sum = 0;
-    for ( int x = 0; x < NUM_OF_RANKS; x++ )
+    sum = 0;
+    for ( u = 0; u < NUM_OF_RANKS; u++ )
     {
-        if ( x < NUM_OF_RANKS-rem ) recvcounts[x] = div;
-        else recvcounts[x] = div+1;
+        if ( u < NUM_OF_RANKS-rem ) recvcounts[u] = div;
+        else recvcounts[u] = div+1;
 
-        sum += x == 0 ? 0 : recvcounts[x-1];
-        recvDispls[x] = x == 0 ? 0 : sum;
+        sum += u == 0 ? 0 : recvcounts[u-1];
+        recvDispls[u] = u == 0 ? 0 : sum;
     }
 
     MPI_Gatherv(
