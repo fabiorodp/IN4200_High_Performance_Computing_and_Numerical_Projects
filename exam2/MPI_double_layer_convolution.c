@@ -218,28 +218,32 @@ void MPI_double_layer_convolution(int M, int N, float *input,
                                   int K1, float *kernel1, int K2, 
                                   float *kernel2, float **output)
 {
-    // calculate max needed processes
-    int maxNeededRanks = (M-K1-K2+2) * (N-K1-K2+2);
-
     // getting number of processes and current rank
     int NUM_OF_RANKS, myRank;
     MPI_Comm_size(MPI_COMM_WORLD, &NUM_OF_RANKS);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    // calculate displacements and number of rows for each process.
+    // global variables
+    int maxNeededRanks = (M-K1-K2+2) * (N-K1-K2+2);
+    int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
+
     int participants;
     if ( NUM_OF_RANKS > maxNeededRanks ) participants = maxNeededRanks;
     else participants = NUM_OF_RANKS;
+
+    int div = lenOutput/participants;
+    int rem = lenOutput%participants;
 
     // allocating arrays
     int *num_elements = malloc(participants * sizeof *num_elements);  // # of elem. transfered
     int *displs = malloc(participants * sizeof *displs);              // idx of the first
 
     // output row and col sizes
-    int M_out = M - (K1-1) - (K2-1);
-    int N_out = N - (K1-1) - (K2-1);
-    int lenElem = (K1+K2-2)*(N+1)+1;
+    int M_out = M - K1 - K2 + 2;
+    int N_out = N - K1 - K2 + 2;
+    int minNumElem = (K1+K2-2)*(N+1)+1;
 
+    // calculate displacements and number of rows for each process.
     if ( participants == maxNeededRanks )
     {
         // calculate displacement and number of elements for each rank
@@ -251,13 +255,11 @@ void MPI_double_layer_convolution(int M, int N, float *input,
             for ( int j = 0; j < N_out; j++ )
             {
                 displs[count] = i*N+j;
-                num_elements[count] = (K1+K2-2)*(N+1)+1;
+                num_elements[count] = minNumElem;
                 count++;
             }
-        printf("ERROR\n");
-        printf("ERROR\n");
-        printf("ERROR\n");
     }
+
     else
     {
         // calculate displacement and number of elements for each rank
@@ -283,23 +285,26 @@ void MPI_double_layer_convolution(int M, int N, float *input,
             if ( entry < numBlocks )
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
-                num_elements[entry] = displs_maxRank[numEntries-1]+lenElem;
+                num_elements[entry] = displs_maxRank[numEntries-1]+minNumElem;
             }
             else if ( entry == numBlocks )
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries] );
-                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+lenElem;
+                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+minNumElem;
             }
             else
             {
                 displs[entry] = ( entry == 0 ? 0 : displs_maxRank[entry*numEntries+1] );
-                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+lenElem;
+                num_elements[entry] = displs_maxRank[participants-numBlocks_remainder+numEntries]-displs_maxRank[participants-numBlocks_remainder]+minNumElem;
             }
         }
     }
-
+    printf("ERROR\n");
+    printf("ERROR\n");
+    printf("ERROR\n");
+    
     float *myInput = malloc( num_elements[myRank] * sizeof *myInput );
-    // MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
     
 
     // Scatter A and x.
@@ -334,10 +339,6 @@ void MPI_double_layer_convolution(int M, int N, float *input,
 
     // computing the convolutions
     double_layer_convolution(M, N, myInput, K1, K2, kernel1, kernel2, num_elements[myRank], myRank, &myOutput, &lenMyOutput);
-
-    int lenOutput = (M-K1-K2+2) * (N-K1-K2+2);
-    int div = lenOutput/participants;
-    int rem = lenOutput%participants;
 
     // computing the number of elements that is received from each process.
     int *recvcounts = malloc( participants * sizeof *recvcounts );
