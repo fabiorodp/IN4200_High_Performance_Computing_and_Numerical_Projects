@@ -63,8 +63,8 @@ Exercise 1:
  being assigned values according to 'i' and 'j' order, which would be preferable 'j' and 'i'
  order for better performance in C programming.
 
- Finally, 'exp' and 'sin' functions are not preferable because they are known as slow. It would
- be better to make the calculations straight inside the for-loop.
+ Finally, 'exp' and 'sin' functions are not preferable because they are known as slow. It
+ would be better to make the calculations straight inside the for-loop.
 */
 void exercise1()
 {
@@ -133,17 +133,19 @@ Exercise 2:
 
  Theory observations:
  - Latency or depth:
- - Wallclock = elapsed time;
- - CPU time does not emcompass contributions from I/O, context switches, other processes.
+ - Wall-clock = elapsed time;
+ - CPU time does not encompass contributions from I/O, context switches, other processes.
  - Speedup: Time_seq / Time_parallel
  - Throughput:
  - Number of bus transactions (cache line transfers):
  - Number of loads and stores:
  - Number of floating-point operations:
- - Machine Balanca BM = possible memory bandwidth[GWords/s] (B_max) /
+ - Machine Balance BM = possible memory bandwidth[GWords/s] (B_max) /
                         peak performance[GFlops/s] (P_max)
 
-                        ***page 63***
+
+ ***page 63***
+
 
  Question:
  - What is the CPU time for n = 10^10 when the following code run?
