@@ -1,12 +1,13 @@
 // compiling & running
-// mpicc -o MPI_main MPI_main.c
-// mpirun -np 2 ./MPI_main 6 5 3 2
+// clang -Xpreprocessor -fopenmp answers.c -lomp
+// ./a.out
 
 
 #include <stdlib.h> // rand, malloc, calloc, realloc and free.
 #include <stdio.h>  // printf, scanf
 #include <mpi.h>
 #include <math.h>
+#include <omp.h>
 
 #define PI 3.14159265
 #define EXP 2.71828
@@ -49,30 +50,69 @@ double sine_taylor(double x,int n)
 }
 
 /*
-Exercise 1:
+EXERCISE 1:
 
  We have to notice from the given code that the for-loops are independent of each other,
- but they were formulated together. Since the first and second for-loops are not dependent
- on each other, they should be detached. Indeed, if the given architecture in the exercise
- is applied, the code will be slow because the second (nested) for-loop is computed n times
- for the first for-loop times n times for the second for-loop, totalizing n*n calculations.
+ but they were formulated together in not an economical way. Since the first and second for-loops
+ are not dependent on each other, they should be detached. Indeed, if the given architecture in
+ the exercise is applied, the code will be slow because the second (nested) for-loop is computed
+ n times for the first for-loop times n times for the second for-loop, totalizing n*n calculations.
  If we split the for-loop, the second for-loop will only be computed n times, saving a lot
  of computer power and bringing more efficiency for the code.
 
- In addition, the second for-loop is formulated in a column-major looping, where C[j][i] is
- being assigned values according to 'i' and 'j' order, which would be preferable 'j' and 'i'
- order for better performance in C programming.
+ In addition, the second for-loop is formulated in a column-major looping order, where C[j][i] is
+ being assigned values according to 'i' and 'j' order, which causes cache misses and compromises
+ performance. Therefore, it would be preferable 'j' and 'i' order, row-major order, for better
+ performance in C programming.
 
- Finally, 'exp' and 'sin' functions are not preferable because they are known as slow. It
- would be better to make the calculations straight inside the for-loop.
+ Also, 'exp' and 'sin' functions are expensive not preferable because they are known as slow. It
+ would be better to make the calculations with simple floating-point operations.
+
+ Finally, it is possible to implement a for-loop unrolling in the second for-loop, which brings
+ more efficiency for large operations.
+
+ Output from the suggested code:
+
+        % clang -Xpreprocessor -fopenmp answers.c -lomp
+        % ./a.out
+
+        Given results from the exercise:
+        c[0]=1 c[1]=1 c[2]=1 c[3]=2 c[4]=2 c[5]=2 c[6]=2 c[7]=2 c[8]=2 c[9]=2
+        2 2 2 2 2 2 2 2 2 2
+        2 2 2 2 2 2 2 2 2 2
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        Wall-time for given code: 0.000020
+
+        My version results from the exercise:
+        c[0]=1 c[1]=1 c[2]=1 c[3]=2 c[4]=2 c[5]=2 c[6]=2 c[7]=2 c[8]=2 c[9]=2
+        2 2 2 2 2 2 2 2 2 2
+        2 2 2 2 2 2 2 2 2 2
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        Wall-time for my code: 0.000001
+        Speedup: 21.000000
 */
 void exercise1()
 {
-    int n=5, c[5], a[5][5];
-    int b[5][5]={{1,1,1,1,1}, {1,1,1,1,1}};
-    int d[5]={1,1,1,1,1};
-    int e[5]={1,1,1,1,1};
+    int n=10, c[10], a[10][10];
+    int b[10][10]={{1,1,1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1,1,1}};
+    int d[10]={1,1,1,1,1,1,1,1,1,1};
+    int e[10]={1,1,1,1,1,1,1,1,1,1};
 
+    double t0 = omp_get_wtime();
     for ( int i=0; i<n; i++ )
     {
         c[i] = exp(1.0*i/n) + sin(3.1415926*i/n);
@@ -80,6 +120,7 @@ void exercise1()
         for ( int j=0; j<n; j++ )
             a[j][i] = b[j][i] + d[j]*e[i];
     }
+    double t1 = omp_get_wtime();
 
     printf("Given results from the exercise:\n");
 
@@ -94,22 +135,55 @@ void exercise1()
 
         printf("\n");
     }
+    printf("Wall-time for given code: %f\n", t1-t0);
 
     // my version
-    int n1=5, c1[5], a1[5][5];
-    int b1[5][5]={{1,1,1,1,1}, {1,1,1,1,1}};
-    int d1[5]={1,1,1,1,1};
-    int e1[5]={1,1,1,1,1};
+    int n1=10, c1[10], a1[10][10];
+    int b1[10][10]={{1,1,1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1,1,1}};
+    int d1[10]={1,1,1,1,1,1,1,1,1,1};
+    int e1[10]={1,1,1,1,1,1,1,1,1,1};
 
-    for ( int i=0; i<n1; i++ )
-        c1[i] = EXP*(1.0*i/n1) + sine_taylor(PI*i/n1, 1000);
+    double t2 = omp_get_wtime();
+//    for ( int i=0; i<n1; i++ )
+//        c1[i] = exp(1.0*i/n1) + sin(3.1415926*i/n1);  // possible to increase performance here
+//        // c1[i] = EXP*(1.0*i/n1) + sine_taylor(PI*i/n1, 2);  // not need a high n; (slower)
 
-    for ( int i=0; i<n1; i++ )
+    double ev, exp_div_n=exp(1.0/n1), pi_div_n=3.1415926/n1;
+    c1[0] = 0.;
+    for ( int i = 1; i<=(n/2); i++ )
+        c1[i] = sin(i*pi_div_n);
+
+    for ( int i = (n/2)+1; i<n; i++ )
+        c1[i] = c1[n1-i]; // taking advantage of sin(pi-x)=sin(x)
+
+    // exp(1.0*i/n) = exp(1.0/n)^i
+    ev = 1.0;
+    for ( int i = 0; i<n; i++)
+    {
+        c1[i] += ev;  //
+        ev *= exp_div_n;
+    }
+
+    for ( int i=0; i<n1; i+=5 )
         for ( int j=0; j<n1; j++ )
+        {
             a1[i][j] = b1[i][j] + d1[i]*e1[j];
+            a1[i+1][j] = b1[i+1][j] + d1[i+1]*e1[j];
+            a1[i+2][j] = b1[i+2][j] + d1[i+2]*e1[j];
+            a1[i+3][j] = b1[i+3][j] + d1[i+3]*e1[j];
+            a1[i+4][j] = b1[i+4][j] + d1[i+4]*e1[j];
+            a1[i+5][j] = b1[i+5][j] + d1[i+5]*e1[j];
+        }
+
+    // remainder
+    if ( n%5 != 0 )
+        for ( int i = n-(n%5); i<n1; i++ )
+            for ( int j = 0; j<n1; j++ )
+                a1[i][j] = b1[i][j] + d1[i]*e[j];
+
+    double t3 = omp_get_wtime();
 
     printf("My version results from the exercise:\n");
-
     for ( int i=0; i<n; i++ )
         printf("c[%d]=%d ", i, c[i]);
 
@@ -122,10 +196,12 @@ void exercise1()
         printf("\n");
     }
 
+    printf("Wall-time for my code: %f\n", t3-t2);
+    printf("Speedup: %f\n", (t1-t0) / (t3-t2));
 }
 
 /*
-Exercise 2:
+EXERCISE 2:
 
  Assume:
  - 40GB/s of memory bandwidth (performance of the paths between memory and cache);
@@ -136,32 +212,64 @@ Exercise 2:
  - Wall-clock = elapsed time;
  - CPU time does not encompass contributions from I/O, context switches, other processes.
  - Speedup: Time_seq / Time_parallel
- - Throughput:
- - Number of bus transactions (cache line transfers):
- - Number of loads and stores:
- - Number of floating-point operations:
- - Machine Balance BM = possible memory bandwidth[GWords/s] (B_max) /
-                        peak performance[GFlops/s] (P_max)
 
+ - MACHINE BALANCE (B_m) = possible memory bandwidth[GWords/s] (b_max) /
+                           peak performance[GFlops/s] (P_max)
+    -- where
+        --- b_m = GB/s / bytes (if double-precision, it occupies 8 bytes in memory) = GW/s
+        --- P_max = #cores * #GHz * flops per cycle = GFlops/s
 
- ***page 63***
+ - CODE BALANCE (B_c) = (#loads + #stores) / #floatingPointOperations (flops)
+ - LIGHTSPEED RATIO = B_m / B_c of peak_max
 
-
+ - If B_c is larger than B_m, then the speed of the computation is determined by the memory traffic:
+    -- MEMORY TRAFFIC TIME: (#iterations * #bytesInMemory) /
+                            (theoreticalMemoryBandwidth (GB/s) * (#iterations/peak
+                             performance[GFlops/s]) )
  Question:
  - What is the CPU time for n = 10^10 when the following code run?
 
  double s = 0.0;
  for (i=0; i<n; i++)
      s += a[i]*a[i];
+     // loads 1 value for 'a';
+     // assumes that 's' is in register, so no cache traffic during the iterations;
+     // 2 floating-points operations.
+
+B_m = (40/8) / 100 = 0.05
+B_c = 1 / 2 = 0.5
+MT_t = (10^10 * 8) / (40 * (10^10 / 10*2))
+*/
+
+/*
+EXERCISE 3:
+ - Dependency between 16 tasks;
+ - All the 16 tasks are equally time-consuming, requiring one hour of a worker.
+ - 3 workers.
+
+Question:
+ -  How many hours minimum do 3 workers need to finish all the 16 tasks?
+
+Table:
+ Hour/Worker
+    1         2         3
+ 1  t1,1      idle      idle
+ 2  t1,2      t2,1      idle
+ 3  t1,3      t2,2      t3,1
+ 4  t1,4      t2,3      t3,2
+ 5  t4,1      t2,4      t3,3
+ 6  t4,2      t3,4      idle
+ 7  t4,3      idle      idle
+ 8  t4,4      idle      idle
+*/
+
+/*
+EXERCISE 4:
 
 */
-void exercise2()
-{
-}
 
 int main( int argc, char **argv )
 {
     exercise1();
-
     return 0;
 }
