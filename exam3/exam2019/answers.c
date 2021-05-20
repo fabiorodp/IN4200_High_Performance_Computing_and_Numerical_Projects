@@ -266,7 +266,56 @@ Table:
 /*
 EXERCISE 4:
 
+ Function:
+    for ( int i = 0; i<n-1; i++ )
+        u[i] = func(u[i+1]);
+
+ The function above can not be parallelized with "#pragma omp parallel for" because of dependencies
+ between the looping iterations. Indeed, the iteration step 'i' is dependent to step 'i+1', thus
+ it is not guaranteed that the task will be split between threads properly. However, with the
+ following modification, introduction of a helper array v, it can be parallelized as wanted:
+
+ double *v = malloc( (n-1)* sizeof *v);
+
+ # pragma omp parallel for
+     for ( int i = 0; i<n-1; i++ )
+        v[i] = (double)func(u[i+1]);
+
+     for ( int i = 0; i<n-1; i++ )
+        u[i] = v[i];
+
+ free(v);
 */
+
+/*
+EXERCISE 5:
+ False sharing is one of the possible reason for a bad scalability of a parallel program.
+
+ FALSE SHARING: It happens in NUMA and UMA systems when 2 or more OMP threads load the same
+ cache line from memory to their private cache. Then, these threads modify variables that reside
+ on the same cache line. This invalidates the cache line and forces a memory update to maintain
+ cache coherency, compromising the performance of the program.
+
+ Example:
+ https://software.intel.com/content/www/us/en/develop/articles/avoiding-and-identifying-false-sharing-among-threads.html
+
+ Others problems with scalability may be communication overhead, synchronization loss, NUMA
+ locality, bandwidth bottlenecks and load imbalance.
+
+ LOAD IMBALANCE: This issue occurs when synchronization point are reached earlier by some workers
+ than to others, in other words, the work distribution was not efficiently done. This problem
+ reflects that some workers that could have been in use is actually in idle waiting for a task. As
+ consequence, computer resources are not utilized.
+
+ COMMUNICATION OVERHEAD: It happens when the data volume to be communicated is not proportional
+ to the overall area of the domain cuts. Good practice always tries to reduce boundary area
+ as far as possible for a minimum number of overheads (communications). A disproportionate number
+ of overheads compromises efficiency and is not preferable. Also, we need to be aware of the
+ locality of the data dependencies because the communication cost increases linearly with the
+ distance that it was to bridge to the CPU cache.
+
+*/
+
 
 int main( int argc, char **argv )
 {
