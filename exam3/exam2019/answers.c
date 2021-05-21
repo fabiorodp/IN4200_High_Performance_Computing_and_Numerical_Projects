@@ -2,6 +2,8 @@
 // clang -Xpreprocessor -fopenmp answers.c -lomp
 // ./a.out
 
+// mpicc -o answer.c
+// mpirun -np 2 ./a.out
 
 #include <stdlib.h> // rand, malloc, calloc, realloc and free.
 #include <stdio.h>  // printf, scanf
@@ -9,6 +11,7 @@
 #include <math.h>
 #include <omp.h>
 #include "string.h"
+#include <mpi.h>
 
 #define PI 3.14159265
 #define EXP 2.71828
@@ -364,14 +367,6 @@ int count_occurrence_omp(const char *text_string, const char *pattern)
     return count;
 }
 
-/*
-EXERCISE 9:
-*/
-int parallel_count_occurrence(const char *text_string, const char *pattern)
-{
-
-}
-
 int main( int argc, char **argv )
 {
     exercise1();
@@ -390,8 +385,6 @@ int main( int argc, char **argv )
     printf("\nCount1=%d and time=%f\n", count1, t1-t0);
     printf("Count2=%d and time=%f\n", count2, t3-t2);
     printf("Speedup = %f\n", (t1-t0) / (t3-t2));
-
-
 
     return 0;
 }
