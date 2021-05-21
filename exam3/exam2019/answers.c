@@ -8,6 +8,7 @@
 #include <mpi.h>
 #include <math.h>
 #include <omp.h>
+#include "string.h"
 
 #define PI 3.14159265
 #define EXP 2.71828
@@ -316,9 +317,81 @@ EXERCISE 5:
 
 */
 
+/*
+EXERCISE 6:
+
+    OUTPUT:
+     On rank 0, own_value=12
+     On rank 1, own_value=16
+     On rank 2, own_value=12
+     On rank 3, own_value=16
+     On rank 4, own_value=12
+     On rank 5, own_value=16
+     On rank 6, own_value=12
+     On rank 7, own_value=16
+*/
+
+/*
+EXERCISE 7:
+*/
+int count_occurrence(const char *text_string, const char *pattern)
+{
+    int i, count=0;
+    size_t lenStr1 = strlen(text_string);
+    size_t lenStr2 = strlen(pattern);
+
+    for ( i = 0; i <= (lenStr1-lenStr2); i++ )
+        if ( strncmp(&text_string[i], pattern, lenStr2) == 0 )
+            count++;
+
+    return count;
+}
+
+/*
+EXERCISE 8:
+*/
+int count_occurrence_omp(const char *text_string, const char *pattern)
+{
+    int i, count=0;
+    size_t lenStr1 = strlen(text_string);
+    size_t lenStr2 = strlen(pattern);
+
+#pragma omp parallel for reduction(+ : count)
+    for ( i = 0; i <= (lenStr1-lenStr2); i++ )
+        if ( strncmp(&text_string[i], pattern, lenStr2) == 0 )
+            count++;
+
+    return count;
+}
+
+/*
+EXERCISE 9:
+*/
+int parallel_count_occurrence(const char *text_string, const char *pattern)
+{
+
+}
 
 int main( int argc, char **argv )
 {
     exercise1();
+
+    const char text_string[] = "ATTTGCGCAGACCTAAGCA";
+    const char pattern[] = "GCA";
+
+    double t0 = omp_get_wtime();
+    int count1 = count_occurrence(text_string, pattern);
+    double t1 = omp_get_wtime();
+
+    double t2 = omp_get_wtime();
+    int count2 = count_occurrence_omp(text_string, pattern);
+    double t3 = omp_get_wtime();
+
+    printf("\nCount1=%d and time=%f\n", count1, t1-t0);
+    printf("Count2=%d and time=%f\n", count2, t3-t2);
+    printf("Speedup = %f\n", (t1-t0) / (t3-t2));
+
+
+
     return 0;
 }
