@@ -130,8 +130,24 @@ int main( int argc, char **argv ) {
         MPI_COMM_WORLD
     );
 
-    if ( rank == 0 )
-        printf("VERSION 2 >> globalCount_V2=%d\n", globalCount_V2);
+    if ( rank == 0 ) printf("VERSION 2 >> globalCount_V2=%d\n", globalCount_V2);
+
+/* ########################## VERSION 2 - end ########################## */
+
+/* ########################## VERSION 3 - begin ########################## */
+
+    int globalCount_V3;
+
+    MPI_Allreduce(
+        &myCount,
+        &globalCount_V3,
+        1,
+        MPI_INT,
+        MPI_SUM,
+        MPI_COMM_WORLD
+    );
+
+    printf("VERSION 3 >> rank = %d     globalCount_V3=%d\n", rank, globalCount_V3);
 
 /* ########################## VERSION 2 - end ########################## */
 
