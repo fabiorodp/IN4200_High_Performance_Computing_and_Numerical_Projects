@@ -149,7 +149,7 @@ int main( int argc, char **argv ) {
 
     printf("VERSION 3 >> rank = %d     globalCount_V3=%d\n", rank, globalCount_V3);
 
-/* ########################## VERSION 2 - end ########################## */
+/* ########################## VERSION 3 - end ########################## */
 
     free(myText_string);
     free(out);
