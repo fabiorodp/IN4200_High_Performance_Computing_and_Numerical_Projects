@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&K1, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&K2, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     if ( rank > 0 )
     {
