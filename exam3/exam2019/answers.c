@@ -2,9 +2,6 @@
 // clang -Xpreprocessor -fopenmp answers.c -lomp
 // ./a.out
 
-// mpicc -o answer.c
-// mpirun -np 2 ./a.out
-
 #include <stdlib.h> // rand, malloc, calloc, realloc and free.
 #include <stdio.h>  // printf, scanf
 #include <mpi.h>
@@ -162,7 +159,7 @@ void exercise1()
 
     // exp(1.0*i/n) = exp(1.0/n)^i
     ev = 1.0;
-    for ( int i = 0; i<n; i++)
+    for ( int i = 0; i<n; i++ )
     {
         c1[i] += ev;  //
         ev *= exp_div_n;
@@ -366,6 +363,24 @@ int count_occurrence_omp(const char *text_string, const char *pattern)
 
     return count;
 }
+
+/*
+EXERCISE 9:
+ >> Resolution in file answerLastExercise.c.
+*/
+
+/*
+EXERCISE 10:
+
+ QUESTION:
+ > Explain why hybrid MPI+OpenMP programming, in comparison with pure MPI programming,
+   will allow a better chance of asynchronous communication for the purpose of overlapping
+   communication with computation.
+
+ ANSWER:
+ >
+
+*/
 
 int main( int argc, char **argv )
 {
