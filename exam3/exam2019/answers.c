@@ -57,17 +57,17 @@ EXERCISE 1:
  but they were formulated together in not an economical way. Since the first and second for-loops
  are not dependent on each other, they should be detached. Indeed, if the given architecture in
  the exercise is applied, the code will be slow because the second (nested) for-loop is computed
- n times for the first for-loop times n times for the second for-loop, totalizing n*n calculations.
- If we split the for-loop, the second for-loop will only be computed n times, saving a lot
- of computer power and bringing more efficiency for the code.
+ n times, for the first for-loop, times n times for the second for-loop, totalizing n*n
+ calculations. If we split the for-loop, the second for-loop will only be computed n times,
+ saving a lot of computer power and bringing more efficiency for the code.
 
  In addition, the second for-loop is formulated in a column-major looping order, where C[j][i] is
  being assigned values according to 'i' and 'j' order, which causes cache misses and compromises
  performance. Therefore, it would be preferable 'j' and 'i' order, row-major order, for better
  performance in C programming.
 
- Also, 'exp' and 'sin' functions are expensive not preferable because they are known as slow. It
- would be better to make the calculations with simple floating-point operations.
+ Also, 'exp' and 'sin' functions are expensive and not preferable because they are known as slow.
+ It would be better to make the calculations with simple floating-point operations.
 
  Finally, it is possible to implement a for-loop unrolling in the second for-loop, which brings
  more efficiency for large operations.
@@ -151,15 +151,15 @@ void exercise1()
 
     double ev, exp_div_n=exp(1.0/n1), pi_div_n=3.1415926/n1;
     c1[0] = 0.;
-    for ( int i = 1; i<=(n/2); i++ )
+    for ( int i = 1; i<=(n1/2); i++ )
         c1[i] = sin(i*pi_div_n);
 
-    for ( int i = (n/2)+1; i<n; i++ )
+    for ( int i = (n1/2)+1; i<n1; i++ )
         c1[i] = c1[n1-i]; // taking advantage of sin(pi-x)=sin(x)
 
     // exp(1.0*i/n) = exp(1.0/n)^i
     ev = 1.0;
-    for ( int i = 0; i<n; i++ )
+    for ( int i = 0; i<n1; i++ )
     {
         c1[i] += ev;  //
         ev *= exp_div_n;
@@ -177,21 +177,21 @@ void exercise1()
         }
 
     // remainder
-    if ( n%5 != 0 )
-        for ( int i = n-(n%5); i<n1; i++ )
+    if ( n1%5 != 0 )
+        for ( int i = n1-(n1%5); i<n1; i++ )
             for ( int j = 0; j<n1; j++ )
                 a1[i][j] = b1[i][j] + d1[i]*e[j];
 
     double t3 = omp_get_wtime();
 
     printf("My version results from the exercise:\n");
-    for ( int i=0; i<n; i++ )
+    for ( int i=0; i<n1; i++ )
         printf("c[%d]=%d ", i, c[i]);
 
     printf("\n");
-    for ( int i=0; i<n; i++ )
+    for ( int i=0; i<n1; i++ )
     {
-        for ( int j=0; j<n; j++ )
+        for ( int j=0; j<n1; j++ )
             printf("%d ", a[i][j]);
 
         printf("\n");
@@ -207,6 +207,7 @@ EXERCISE 2:
  Assume:
  - 40GB/s of memory bandwidth (performance of the paths between memory and cache);
  - 100 GFLOP/s (floating-point operations per second in double precision DP);
+ - 10^9 = GB/s
 
  Theory observations:
  - Latency or depth:
@@ -217,7 +218,7 @@ EXERCISE 2:
  - MACHINE BALANCE (B_m) = possible memory bandwidth[GWords/s] (b_max) /
                            peak performance[GFlops/s] (P_max)
     -- where
-        --- b_m = GB/s / bytes (if double-precision, it occupies 8 bytes in memory) = GW/s
+        --- b_max = GB/s / bytes (if double-precision, it occupies 8 bytes in memory) = GW/s
         --- P_max = #cores * #GHz * flops per cycle = GFlops/s
 
  - CODE BALANCE (B_c) = (#loads + #stores) / #floatingPointOperations (flops)
@@ -225,8 +226,7 @@ EXERCISE 2:
 
  - If B_c is larger than B_m, then the speed of the computation is determined by the memory traffic:
     -- MEMORY TRAFFIC TIME: (#iterations * #bytesInMemory) /
-                            (theoreticalMemoryBandwidth (GB/s) * (#iterations/peak
-                             performance[GFlops/s]) )
+                            (theoreticalMemoryBandwidth (GB/s) * GB/s )
  Question:
  - What is the CPU time for n = 10^10 when the following code run?
 
@@ -239,7 +239,9 @@ EXERCISE 2:
 
 B_m = (40/8) / 100 = 0.05
 B_c = 1 / 2 = 0.5
-MT_t = (10^10 * 8) / (40 * (10^10 / 10*2))
+MT_t = (10^10 * 8) / (40 * 10^9) = 2 seconds
+
+ * We assume that the compiler has enabled the standard optimization of prefetch.
 */
 
 /*
@@ -378,8 +380,11 @@ EXERCISE 10:
    communication with computation.
 
  ANSWER:
- >
-
+ > The hybrid MPI and OpenMP mean that its distributed task is subjected to several OpenMP
+ threads for each MPI process. Therefore, inside the parallel region in an MPI process,
+ the computations can be parallelized between the threads. However, the cos side is that
+ the division of the computation tasks are not possible by #pragma omp parallel, but by other
+ not straightforward ways.
 */
 
 int main( int argc, char **argv )
