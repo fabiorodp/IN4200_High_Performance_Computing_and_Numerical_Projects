@@ -65,7 +65,16 @@ double** sweep(int N, double **table1, int n, double **mask, double**table2,
 }
 
 /*
-collapse-clause:
+EXERCISE 3:
+ OMP Directives and Clauses:
+ - "#pragma omp parallel for" directive was used before the outermost for-loop "for (i=0; i<=N-n;
+ i++)" because its iterations "i" are completely independent and possible to parallelize.
+ - The private-clause is used because iterations "j", "ii" and "jj" are dependent on each other and
+ not possible to parallelize without race conditions. Thus, we make these iterations private for
+ each thread, fixing the race conditions.
+ - The Collapse-clause is used because the 2 outermost for-loops "for (i=0; i<=N-n; i++)" and
+ "for (j=0; j<=N-n; j++)" iterates in the same range, therefore can be fused in a unique for-loop
+ and it might increase performance.
 */
 double** sweep_omp(int N, double **table1, int n, double **mask, double**table2,
                    int verbose, double *time)
