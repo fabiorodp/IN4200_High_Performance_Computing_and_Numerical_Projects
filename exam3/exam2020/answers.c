@@ -28,7 +28,20 @@ EXERCISE 1.a:
 
 /*
 EXERCISE 1.b:
+ >> The minimum possible wavefront is 9, according to the following table:
 
+                     W1      W2      W3     W4      W5
+            h1      t1.1    idle    idle    idle    idle
+            h2      t2.1    t1.2    idle    idle    idle
+            h3      t3.1    t.2.2   t.1.3   idle    idle
+            h4      t4.1    t.3.2   t.2.3   t1.4    idle
+            h5      t5.1    t.4.2   t.3.3   t2.4    t1.5
+            h6      t5.2    t.4.3   t.3.4   t2.5    idle
+            h7      t5.3    t.4.4   t.3.5   idle    idle
+            h8      t4.5    t5.4    idle    idle    idle
+            h9      t5.5    idle    idle    idle    idle
+
+ >> Therefore, 5 workers are the maximum number to finish the task in its minimum time of 9 hours.
 */
 
 /*
