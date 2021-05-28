@@ -218,8 +218,9 @@ EXERCISE 2:
  - MACHINE BALANCE (B_m) = possible memory bandwidth[GWords/s] (b_max) /
                            peak performance[GFlops/s] (P_max)
     -- where
-        --- b_max = GB/s / bytes (if double-precision, it occupies 8 bytes in memory) = GW/s
-        --- P_max = #cores * #GHz * flops per cycle = GFlops/s
+        --- b_max = #memoryFrequency=GB/s / bytes (if double-precision, it occupies 8 bytes in
+        memory) = GW/s
+        --- P_max = #cores * #CPU_CLOCK_Rate_GHz * flops per cycle = GFlops/s
 
  - CODE BALANCE (B_c) = (#loads + #stores) / #floatingPointOperations (flops)
  - LIGHTSPEED RATIO = B_m / B_c of peak_max
