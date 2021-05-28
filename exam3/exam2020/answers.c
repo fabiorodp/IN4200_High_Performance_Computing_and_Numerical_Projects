@@ -46,13 +46,76 @@ EXERCISE 1.b:
 
 /*
 EXERCISE 1.c:
-
+ >> For P <= N
 */
 
 /*
 EXERCISE 2:
-
+ How would you parallelize the following code segment using OpenMP directives?
+ Please provide sufficient explanations. Also, what are your opinions about
+ the speedup that can be achieved as the number of threads is increased?
 */
+void exercise2()
+{
+    int i,j, sqrt_N;
+    char *array = malloc(N);  // N is a predefined very large integer
+
+    array[0] = array[1] = 0;
+
+    for ( i=2; i<N; i++ )
+        array[i] = 1;
+
+    sqrt_N = (int)(sqrt(N));  // square root of N
+
+    for ( i=2; i<=sqrt_N; i++ )
+    {
+        if ( array[i] )
+        {
+            for ( j=i*i; j<N; j+=i )
+                array[j] = 0;
+        }
+    }
+    free(array);
+}
+
+/*
+EXERCISE 2:
+ >> The first parallel region is used in the first for-loop "for ( i=2; i<N; i++ )"
+ that has completely iterations "i". Also, the directive for is used to split
+ the iterations between threads.
+
+ Regarding the nested for-loop "for ( i=2; i<=sqrt_N; i++ )", it is not
+ paraleliable as the previous one, because their iterations are not completely
+ independent and it might suffer race conditions. However, it is possible to
+ open a parallel region with the iteration "i" as private for every thread,
+ avoiding overheads. Therefore, the directive "for" is only used in the inner
+ for-loop, which is completely independent.
+*/
+void exercise2_omp()
+{
+    int i,j, sqrt_N;
+    char *array = malloc(N);  // N is a predefined very large integer
+
+    array[0] = array[1] = 0;
+
+#pragma omp parallel for
+    for ( i=2; i<N; i++ )
+        array[i] = 1;
+
+    sqrt_N = (int)(sqrt(N));  // square root of N
+
+#pragma omp parallel private(i)
+    for ( i=2; i<=sqrt_N; i++ )
+    {
+        if ( array[i] )
+        {
+#pragma omp for
+            for ( j=i*i; j<N; j+=i )
+                array[j] = 0;
+        }
+    }
+    free(array);
+}
 
 /*
 EXERCISE 3:
