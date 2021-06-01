@@ -54,7 +54,7 @@ EXERCISE 2:
  Please provide sufficient explanations. Also, what are your opinions about
  the speedup that can be achieved as the number of threads is increased?
 */
-void exercise2()
+void exercise2(int N)
 {
     int i,j, sqrt_N;
     char *array = malloc(N);  // N is a predefined very large integer
@@ -90,7 +90,7 @@ EXERCISE 2:
  avoiding overheads. Therefore, the directive "for" is only used in the inner
  for-loop, which is completely independent.
 */
-void exercise2_omp()
+void exercise2_omp(int N)
 {
     int i,j, sqrt_N;
     char *array = malloc(N);  // N is a predefined very large integer
