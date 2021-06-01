@@ -4,7 +4,6 @@
 
 #include <stdlib.h> // rand, malloc, calloc, realloc and free.
 #include <stdio.h>  // printf, scanf
-#include <mpi.h>
 #include <math.h>
 #include <omp.h>
 #include "string.h"
